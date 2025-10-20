@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { toast } from 'sonner';
 
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
+
 interface TrashCan {
-  id: number;
+  id: number | string;
   coordinates: [number, number];
   name: string;
 }
@@ -14,85 +15,119 @@ interface TrashCan {
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [isTokenSet, setIsTokenSet] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [trashCans, setTrashCans] = useState<TrashCan[]>([]);
+  const [isLoadingBins, setIsLoadingBins] = useState(false);
+  const [routeInfo, setRouteInfo] = useState<{distance: number, duration: number} | null>(null);
+  const [showBinnedButton, setShowBinnedButton] = useState(false);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // Mock trash can locations (in a real app, these would come from a database)
-  const trashCans: TrashCan[] = [
-    { id: 1, coordinates: [-73.9857, 40.7484], name: 'Park Trash Can' },
-    { id: 2, coordinates: [-73.9867, 40.7494], name: 'Street Corner Bin' },
-    { id: 3, coordinates: [-73.9847, 40.7474], name: 'Plaza Bin' },
-    { id: 4, coordinates: [-73.9877, 40.7464], name: 'Main St. Trash' },
-  ];
+  const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
+    setIsLoadingBins(true);
+    try {
+      const overpassQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="waste_basket"](around:${radiusMeters},${lat},${lon});
+        );
+        out body;
+      `;
+      
+      const response = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: overpassQuery,
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch trash cans');
+      
+      const data = await response.json();
+      
+      const bins: TrashCan[] = data.elements.map((element: any) => ({
+        id: element.id,
+        coordinates: [element.lon, element.lat] as [number, number],
+        name: element.tags?.name || 'Public Bin',
+      }));
+      
+      setTrashCans(bins);
+      
+      if (bins.length === 0) {
+        toast.info('No bins found nearby');
+      } else {
+        toast.success(`Found ${bins.length} bins nearby`);
+      }
+    } catch (error) {
+      console.error('Error fetching trash cans:', error);
+      toast.error('Could not load nearby bins');
+    } finally {
+      setIsLoadingBins(false);
+    }
+  };
 
-  const handleTokenSubmit = () => {
-    if (mapboxToken.trim()) {
-      setIsTokenSet(true);
-      toast.success('Map loaded! Finding your location...');
-    } else {
-      toast.error('Please enter a valid Mapbox token');
+  const getWalkingRoute = async (start: [number, number], end: [number, number]) => {
+    try {
+      const coords = `${start[0]},${start[1]};${end[0]},${end[1]}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${coords}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch route');
+      
+      const data = await response.json();
+      
+      if (data.routes && data.routes[0]) {
+        const route = data.routes[0];
+        return {
+          geometry: route.geometry,
+          distance: route.distance,
+          duration: route.duration,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching walking route:', error);
+      toast.error('Could not calculate route');
+      return null;
     }
   };
 
   useEffect(() => {
-    if (!mapContainer.current || !isTokenSet) return;
+    if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = mapboxToken;
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    // Get user's location
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const userCoords: [number, number] = [
           position.coords.longitude,
           position.coords.latitude,
         ];
         setUserLocation(userCoords);
 
-        // Initialize map
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/streets-v12',
+          style: 'mapbox://styles/mapbox/light-v11',
           center: userCoords,
-          zoom: 15,
+          zoom: 16,
         });
 
-        // Add user location marker
-        new mapboxgl.Marker({ color: '#22c55e' })
+        new mapboxgl.Marker({ color: '#2A2A2A' })
           .setLngLat(userCoords)
-          .setPopup(new mapboxgl.Popup().setHTML('<p class="font-semibold">You are here!</p>'))
+          .setPopup(new mapboxgl.Popup().setHTML('<p class="text-sm font-medium">You are here</p>'))
           .addTo(map.current);
 
-        // Add trash can markers
-        trashCans.forEach((trash) => {
-          const marker = new mapboxgl.Marker({ color: '#f97316' })
-            .setLngLat(trash.coordinates)
-            .setPopup(
-              new mapboxgl.Popup().setHTML(
-                `<p class="font-semibold">${trash.name}</p><button class="mt-2 px-3 py-1 bg-primary text-primary-foreground rounded-lg text-sm" onclick="window.showRoute(${trash.coordinates})">Show Route</button>`
-              )
-            )
-            .addTo(map.current!);
-          markersRef.current.push(marker);
-        });
+        await fetchNearbyTrashCans(userCoords[1], userCoords[0], 1000);
 
-        // Add navigation controls
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-        toast.success('Map ready! Tap a trash can to see the route.');
       },
       (error) => {
         console.error('Geolocation error:', error);
-        toast.error('Could not get your location. Please enable location services.');
+        toast.error('Please enable location services');
         
-        // Fallback to NYC if location fails
-        const fallbackCoords: [number, number] = [-73.9857, 40.7484];
+        const fallbackCoords: [number, number] = [24.9384, 60.1699];
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/streets-v12',
+          style: 'mapbox://styles/mapbox/light-v11',
           center: fallbackCoords,
-          zoom: 15,
+          zoom: 16,
         });
       }
     );
@@ -103,53 +138,80 @@ const Map = () => {
       markersRef.current = [];
       map.current?.remove();
     };
-  }, [isTokenSet, mapboxToken]);
+  }, []);
 
-  const findNearestTrash = () => {
+  useEffect(() => {
+    if (!map.current || trashCans.length === 0) return;
+
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    trashCans.forEach((trash) => {
+      const marker = new mapboxgl.Marker({ color: '#6B6B6B' })
+        .setLngLat(trash.coordinates)
+        .setPopup(
+          new mapboxgl.Popup().setHTML(
+            `<p class="text-sm font-medium">${trash.name}</p>`
+          )
+        )
+        .addTo(map.current!);
+      markersRef.current.push(marker);
+    });
+  }, [trashCans]);
+
+  const handleBinIt = async () => {
     if (!userLocation) {
       toast.error('Waiting for your location...');
       return;
     }
-
-    // Calculate distances
+    
+    if (trashCans.length === 0) {
+      toast.error('No bins found nearby');
+      return;
+    }
+    
+    const calculateDistance = (coord1: [number, number], coord2: [number, number]) => {
+      const R = 6371e3;
+      const φ1 = coord1[1] * Math.PI / 180;
+      const φ2 = coord2[1] * Math.PI / 180;
+      const Δφ = (coord2[1] - coord1[1]) * Math.PI / 180;
+      const Δλ = (coord2[0] - coord1[0]) * Math.PI / 180;
+      
+      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      
+      return R * c;
+    };
+    
     const distances = trashCans.map((trash) => ({
       ...trash,
-      distance: Math.sqrt(
-        Math.pow(trash.coordinates[0] - userLocation[0], 2) +
-          Math.pow(trash.coordinates[1] - userLocation[1], 2)
-      ),
+      distance: calculateDistance(userLocation, trash.coordinates),
     }));
-
-    // Find nearest
+    
     const nearest = distances.reduce((prev, current) =>
       prev.distance < current.distance ? prev : current
     );
-
-    // Center map on nearest trash can
-    map.current?.flyTo({
-      center: nearest.coordinates,
-      zoom: 16,
-      duration: 2000,
-    });
-
-    // Show route (simplified - in real app would use Mapbox Directions API)
+    
+    const route = await getWalkingRoute(userLocation, nearest.coordinates);
+    
+    if (!route) return;
+    
     if (map.current?.getSource('route')) {
       map.current.removeLayer('route');
       map.current.removeSource('route');
     }
-
+    
     map.current?.addSource('route', {
       type: 'geojson',
       data: {
         type: 'Feature',
         properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: [userLocation, nearest.coordinates],
-        },
+        geometry: route.geometry,
       },
     });
-
+    
     map.current?.addLayer({
       id: 'route',
       type: 'line',
@@ -159,60 +221,101 @@ const Map = () => {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': '#22c55e',
+        'line-color': '#2A2A2A',
         'line-width': 4,
       },
     });
-
-    const distanceKm = (nearest.distance * 111).toFixed(2); // Rough conversion to km
-    toast.success(`Nearest trash can is ${distanceKm}km away at ${nearest.name}!`);
+    
+    const coordinates = route.geometry.coordinates;
+    const bounds = coordinates.reduce((bounds: any, coord: any) => {
+      return bounds.extend(coord);
+    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    
+    map.current?.fitBounds(bounds, {
+      padding: 80,
+      duration: 1000,
+    });
+    
+    const distanceText = route.distance < 1000 
+      ? `${Math.round(route.distance)}m` 
+      : `${(route.distance / 1000).toFixed(1)}km`;
+    const durationText = `${Math.ceil(route.duration / 60)} min`;
+    
+    setRouteInfo({ distance: route.distance, duration: route.duration });
+    setShowBinnedButton(true);
+    
+    toast.success(`${distanceText} away (${durationText} walk)`);
   };
 
-  if (!isTokenSet) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] p-6 bg-muted/30 rounded-lg">
-        <div className="max-w-md w-full space-y-4">
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold">Enter Your Mapbox Token</h3>
-            <p className="text-sm text-muted-foreground">
-              Get your free token at{' '}
-              <a
-                href="https://account.mapbox.com/access-tokens/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="pk.eyJ1..."
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleTokenSubmit}>Load Map</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleBinnedIt = () => {
+    toast.success('Thanks for keeping it clean!');
+    
+    if (map.current?.getSource('route')) {
+      map.current.removeLayer('route');
+      map.current.removeSource('route');
+    }
+    
+    setRouteInfo(null);
+    setShowBinnedButton(false);
+    
+    if (userLocation) {
+      map.current?.flyTo({
+        center: userLocation,
+        zoom: 16,
+        duration: 1000,
+      });
+    }
+  };
 
   return (
-    <div className="relative w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
+    <div className="relative w-full h-screen">
       <div ref={mapContainer} className="absolute inset-0" />
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-        <Button
-          onClick={findNearestTrash}
-          size="lg"
-          className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg text-lg px-8 py-6 h-auto"
-        >
-          🚨 Find Nearest Trash Can!
-        </Button>
+      
+      <div className="absolute top-6 left-6 z-10 bg-white/95 backdrop-blur px-4 py-2 rounded-md shadow-sm">
+        <h1 className="text-xl font-semibold text-foreground">bin there</h1>
       </div>
+      
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
+        {!showBinnedButton ? (
+          <Button
+            onClick={handleBinIt}
+            disabled={isLoadingBins || trashCans.length === 0}
+            className="bg-foreground hover:bg-foreground/90 text-background shadow-lg px-8 py-6 h-auto text-base font-medium"
+          >
+            {isLoadingBins ? 'Loading bins...' : 'Bin It'}
+          </Button>
+        ) : (
+          <>
+            <Button
+              onClick={handleBinIt}
+              variant="outline"
+              className="bg-white hover:bg-gray-50 text-foreground shadow-lg px-6 py-6 h-auto text-base font-medium"
+            >
+              Find Another
+            </Button>
+            <Button
+              onClick={handleBinnedIt}
+              className="bg-foreground hover:bg-foreground/90 text-background shadow-lg px-8 py-6 h-auto text-base font-medium"
+            >
+              Binned It
+            </Button>
+          </>
+        )}
+      </div>
+      
+      {routeInfo && (
+        <div className="absolute top-6 right-6 z-10 bg-white/95 backdrop-blur px-4 py-3 rounded-md shadow-sm">
+          <div className="text-sm text-muted-foreground">Distance</div>
+          <div className="text-lg font-semibold">
+            {routeInfo.distance < 1000 
+              ? `${Math.round(routeInfo.distance)}m` 
+              : `${(routeInfo.distance / 1000).toFixed(1)}km`}
+          </div>
+          <div className="text-sm text-muted-foreground mt-1">
+            {Math.ceil(routeInfo.duration / 60)} min walk
+          </div>
+        </div>
+      )}
     </div>
   );
 };
