@@ -21,6 +21,11 @@ const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
+// Check if Mapbox token is configured
+if (!MAPBOX_TOKEN) {
+  console.error('VITE_MAPBOX_TOKEN is not configured. Please add it to your environment variables.');
+}
+
 interface TrashCan {
   id: number | string;
   coordinates: [number, number];
@@ -212,6 +217,12 @@ const Map = () => {
 
   useEffect(() => {
     if (!mapContainer.current) return;
+
+    // Runtime check for Mapbox token
+    if (!MAPBOX_TOKEN) {
+      toast.error('Map configuration error. Please contact support.');
+      return;
+    }
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 

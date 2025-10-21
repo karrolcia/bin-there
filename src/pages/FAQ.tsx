@@ -14,6 +14,12 @@ const FAQ = () => {
   useEffect(() => {
     document.title = "FAQ - bin there";
     
+    // Update meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "Get answers to common questions about bin there. Learn how to find nearby trash cans, track your impact, and use our bin locator app effectively.");
+    }
+    
     // Add FAQPage structured data
     const script = document.createElement('script');
     script.type = 'application/ld+json';

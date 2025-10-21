@@ -4,6 +4,7 @@ import Map from '@/components/Map';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { StatsDisplay } from '@/components/StatsDisplay';
+import { Footer } from '@/components/Footer';
 import { LogIn, HelpCircle } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 
@@ -21,8 +22,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center">
-      <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center pb-16">
+        <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
         <div className="space-y-8 fade-up-enter">
           <img 
             src={logo} 
@@ -77,15 +79,17 @@ const Index = () => {
         </div>
       </div>
       
-      <AuthModal 
-        open={showAuthModal} 
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          setShowMap(true);
-        }}
-      />
-    </div>
+        <AuthModal 
+          open={showAuthModal} 
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={() => {
+            setShowAuthModal(false);
+            setShowMap(true);
+          }}
+        />
+      </div>
+      <Footer />
+    </>
   );
 };
 
