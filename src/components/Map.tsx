@@ -5,7 +5,8 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { celebrateBinning } from '@/utils/confetti';
 import { BinSuccessModal } from './BinSuccessModal';
-import { Compass, Heart } from 'lucide-react';
+import { Compass, Heart, Trash2 } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
 
@@ -57,9 +58,9 @@ const Map = () => {
       setTrashCans(bins);
       
       if (bins.length === 0) {
-        toast.info("Hmm, no bins nearby yet. Try zooming out? (You're still a hero for picking it up!) 🐶");
+        toast.info("Hmm, no bins nearby yet. Try zooming out?");
       } else {
-        toast.success(`Perfect! ${bins.length} bins nearby for that poop bag 🐕`);
+        toast.success(`Perfect! ${bins.length} bins nearby`);
       }
     } catch (error) {
       console.error('Error fetching trash cans:', error);
@@ -198,9 +199,16 @@ const Map = () => {
 
       trashCans.forEach((trash) => {
         const binMarkerEl = document.createElement('div');
-        binMarkerEl.innerHTML = '♻️';
-        binMarkerEl.className = 'text-2xl bounce-enter';
-        binMarkerEl.style.filter = 'drop-shadow(0 2px 8px rgba(100, 130, 110, 0.3))';
+        binMarkerEl.className = 'w-9 h-9 bg-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white bounce-enter';
+        binMarkerEl.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            <line x1="10" x2="10" y1="11" y2="17"/>
+            <line x1="14" x2="14" y1="11" y2="17"/>
+          </svg>
+        `;
         
         const marker = new mapboxgl.Marker({ element: binMarkerEl })
           .setLngLat(trash.coordinates)
@@ -311,7 +319,7 @@ const Map = () => {
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
     
-    toast.success(`${distanceText} away - just ${durationText}. Your pup can stretch their legs! 🐾`);
+    toast.success(`${distanceText} away - just ${durationText}`);
   };
 
   const handleBinnedIt = () => {
@@ -343,10 +351,8 @@ const Map = () => {
     <div className="relative w-full h-screen">
       <div ref={mapContainer} className="absolute inset-0" />
       
-      <div className="absolute top-6 left-6 z-10 bg-white/80 backdrop-blur-xl px-5 py-2.5 rounded-2xl shadow-md border border-border/30 flex items-center gap-2">
-        <span className="text-lg">🐾</span>
-        <span className="text-lg">🌱</span>
-        <h1 className="text-base font-medium text-foreground">bin there</h1>
+      <div className="absolute top-6 left-6 z-10 bg-card/90 backdrop-blur-xl rounded-2xl p-3 shadow-lg border border-border/50">
+        <img src={logo} alt="bin there" className="h-10 w-auto" />
       </div>
       
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
@@ -357,10 +363,10 @@ const Map = () => {
               disabled={isLoadingBins || trashCans.length === 0}
               className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl px-8 py-6 h-auto text-base font-medium transition-all duration-300 flex items-center gap-2"
             >
-              <Compass className="w-4 h-4" />
+              <Compass className="w-5 h-5" />
               {isLoadingBins ? 'Searching nearby...' : 'Find Nearest Bin'}
             </Button>
-            <p className="text-xs text-muted-foreground italic">Got a poop bag? Let's find the perfect spot</p>
+            <p className="text-xs text-muted-foreground italic">Find the nearest bin</p>
           </div>
         ) : (
           <>
@@ -375,7 +381,7 @@ const Map = () => {
               onClick={handleBinnedIt}
               className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl px-8 py-6 h-auto text-base font-medium transition-all duration-300 flex items-center gap-2"
             >
-              <Heart className="w-4 h-4" />
+              <Heart className="w-5 h-5" />
               Binned It!
             </Button>
           </>
@@ -383,19 +389,17 @@ const Map = () => {
       </div>
       
       {routeInfo && (
-        <div className="absolute top-6 right-6 z-10 bg-white/80 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-md border border-border/30 bounce-enter">
+        <div className="absolute top-6 right-6 z-10 bg-card/90 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-lg border border-border/50 bounce-enter">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">🚶</span>
-            <div className="text-lg font-semibold text-primary">
+            <div className="text-lg font-semibold text-foreground">
               {routeInfo.distance < 1000 
                 ? `${Math.round(routeInfo.distance)}m` 
                 : `${(routeInfo.distance / 1000).toFixed(1)}km`}
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
-            About {Math.ceil(routeInfo.duration / 60)} min
+            About {Math.ceil(routeInfo.duration / 60)} min walk
           </div>
-          <p className="text-xs text-primary/70 italic mt-2">Quick detour - your neighbors will thank you! 🐾</p>
         </div>
       )}
       

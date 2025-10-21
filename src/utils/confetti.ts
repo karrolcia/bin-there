@@ -1,19 +1,15 @@
 import confetti from 'canvas-confetti';
 
 export const celebrateBinning = () => {
-  // Nature-inspired color palette
-  const colors = ['#7BA57D', '#5D9B8C', '#A4C2A8', '#D4E4D7', '#F5E6CA'];
-  
-  // Add paw print and leaf shapes
-  const pawPrint = confetti.shapeFromText({ text: '🐾', scalar: 2 });
-  const leaf = confetti.shapeFromText({ text: '🌱', scalar: 2 });
+  // Refined nature-inspired palette with muted greens
+  const colors = ['#6B8E7A', '#7A9E89', '#8FAF99', '#A8BFA8', '#5D7A6B'];
   
   confetti({
     particleCount: 80,
     spread: 70,
     origin: { y: 0.8 },
     colors: colors,
-    shapes: [pawPrint, leaf, 'circle'],
+    shapes: ['circle', 'square'],
     ticks: 150,
     gravity: 0.8,
     decay: 0.92,
@@ -24,15 +20,12 @@ export const celebrateBinning = () => {
   
   // Second burst with slight delay for more organic feel
   setTimeout(() => {
-    const pawPrint = confetti.shapeFromText({ text: '🐾', scalar: 2 });
-    const leaf = confetti.shapeFromText({ text: '🌱', scalar: 2 });
-    
     confetti({
       particleCount: 40,
       spread: 100,
       origin: { y: 0.8 },
       colors: colors,
-      shapes: [pawPrint, leaf, 'circle'],
+      shapes: ['circle', 'square'],
       ticks: 120,
       gravity: 0.7,
       startVelocity: 20,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Map from '@/components/Map';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/logo.svg';
 
 const Index = () => {
   const [showMap, setShowMap] = useState(false);
@@ -10,14 +11,17 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
         <div className="space-y-6 fade-up-enter">
-          <h1 className="text-6xl md:text-7xl font-medium text-foreground tracking-tight" style={{ animationDelay: '0.1s' }}>
-            bin there
-          </h1>
+          <img 
+            src={logo} 
+            alt="bin there" 
+            className="h-16 md:h-20 mx-auto" 
+            style={{ animationDelay: '0.1s' }}
+          />
           <p className="text-xl md:text-2xl font-normal text-foreground/80 leading-relaxed" style={{ animationDelay: '0.2s' }}>
-            You picked it up. Now bin it like a boss. 🐕
+            You picked it up. Now bin it like a boss.
           </p>
           <p className="text-sm font-light italic text-muted-foreground" style={{ animationDelay: '0.3s' }}>
             Because nobody likes stepping in surprises
