@@ -72,14 +72,22 @@ serve(async (req) => {
       const now = new Date();
       const lastBinnedAt = profile?.last_binned_at ? new Date(profile.last_binned_at) : null;
       
-      // Calculate streak
+      // Calculate streak - only increment once per calendar day
       let newStreakDays = profile?.streak_days || 0;
       if (lastBinnedAt) {
-        const hoursSinceLastBin = (now.getTime() - lastBinnedAt.getTime()) / (1000 * 60 * 60);
-        if (hoursSinceLastBin < 48) { // Within 2 days maintains streak
-          newStreakDays = newStreakDays + 1;
+        const lastBinDate = new Date(lastBinnedAt).toDateString();
+        const todayDate = now.toDateString();
+        
+        if (lastBinDate === todayDate) {
+          // Same day - don't increment streak
+          newStreakDays = profile?.streak_days || 0;
         } else {
-          newStreakDays = 1; // Reset streak
+          const hoursSinceLastBin = (now.getTime() - lastBinnedAt.getTime()) / (1000 * 60 * 60);
+          if (hoursSinceLastBin < 48) { // Within 2 days maintains streak
+            newStreakDays = newStreakDays + 1;
+          } else {
+            newStreakDays = 1; // Reset streak
+          }
         }
       } else {
         newStreakDays = 1;

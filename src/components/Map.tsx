@@ -65,6 +65,27 @@ const Map = () => {
     return R * c;
   };
 
+  const fetchWithRetry = async (url: string, body: string, retries = 3): Promise<Response> => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url, { method: 'POST', body });
+        if (response.ok) return response;
+        
+        if (response.status === 429) {
+          // Rate limited - wait longer with exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1)));
+          continue;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      } catch (error) {
+        if (i === retries - 1) throw error;
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+    throw new Error('Max retries reached');
+  };
+
   const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
     setIsLoadingBins(true);
     try {
@@ -76,13 +97,7 @@ const Map = () => {
         out body;
       `;
       
-      const response = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: overpassQuery,
-      });
-      
-      if (!response.ok) throw new Error('Failed to fetch trash cans');
-      
+      const response = await fetchWithRetry('https://overpass-api.de/api/interpreter', overpassQuery);
       const data = await response.json();
       
       const bins: TrashCan[] = data.elements.map((element: any) => ({
@@ -115,7 +130,19 @@ const Map = () => {
       }
     } catch (error) {
       console.error('Error fetching trash cans:', error);
-      toast.error("Oops! Let's try that again");
+      
+      // Better error messages
+      if (error instanceof Error) {
+        if (error.message.includes('429')) {
+          toast.error("Too many requests — wait a moment and try again");
+        } else if (error.message.includes('timeout')) {
+          toast.error("Connection timed out — check your internet");
+        } else {
+          toast.error("Couldn't load bins — tap to retry");
+        }
+      } else {
+        toast.error("Oops! Let's try that again");
+      }
     } finally {
       setIsLoadingBins(false);
     }
