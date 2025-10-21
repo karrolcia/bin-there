@@ -53,6 +53,53 @@ serve(async (req) => {
       throw insertError;
     }
 
+    // Update bin usage statistics (for all users, authenticated or not)
+    const roundedLat = Math.round(binLat * 1000000) / 1000000; // 6 decimal precision
+    const roundedLng = Math.round(binLng * 1000000) / 1000000;
+
+    console.log('Updating bin usage stats:', { roundedLat, roundedLng, binName });
+
+    // Try to find existing bin stats
+    const { data: existingStats } = await supabase
+      .from('bin_usage_stats')
+      .select('id, usage_count')
+      .eq('bin_lat', roundedLat)
+      .eq('bin_lng', roundedLng)
+      .maybeSingle();
+
+    if (existingStats) {
+      // Increment usage count
+      const { error: updateStatsError } = await supabase
+        .from('bin_usage_stats')
+        .update({
+          usage_count: existingStats.usage_count + 1,
+          last_used_at: new Date().toISOString()
+        })
+        .eq('id', existingStats.id);
+      
+      if (updateStatsError) {
+        console.error('Error updating bin stats:', updateStatsError);
+      } else {
+        console.log('Bin stats updated:', existingStats.usage_count + 1);
+      }
+    } else {
+      // Create new bin stats entry
+      const { error: insertStatsError } = await supabase
+        .from('bin_usage_stats')
+        .insert({
+          bin_lat: roundedLat,
+          bin_lng: roundedLng,
+          bin_name: binName,
+          usage_count: 1
+        });
+      
+      if (insertStatsError) {
+        console.error('Error inserting bin stats:', insertStatsError);
+      } else {
+        console.log('New bin stats created');
+      }
+    }
+
     // If user is authenticated, update their profile stats
     let totalBins = 0;
     let streakDays = 0;

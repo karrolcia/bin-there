@@ -55,6 +55,36 @@ export type Database = {
           },
         ]
       }
+      bin_usage_stats: {
+        Row: {
+          bin_lat: number
+          bin_lng: number
+          bin_name: string
+          created_at: string | null
+          id: string
+          last_used_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          bin_lat: number
+          bin_lng: number
+          bin_name: string
+          created_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          bin_lat?: number
+          bin_lng?: number
+          bin_name?: string
+          created_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       community_bins: {
         Row: {
           created_at: string
