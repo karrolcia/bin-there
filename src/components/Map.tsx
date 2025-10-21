@@ -34,6 +34,7 @@ const Map = () => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [trashCans, setTrashCans] = useState<TrashCan[]>([]);
   const [isLoadingBins, setIsLoadingBins] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const [routeInfo, setRouteInfo] = useState<{distance: number, duration: number} | null>(null);
   const [showBinnedButton, setShowBinnedButton] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -86,11 +87,36 @@ const Map = () => {
     throw new Error('Max retries reached');
   };
 
+  const fetchFallbackBins = async () => {
+    try {
+      const { data } = await supabase
+        .from('bin_usage_stats')
+        .select('*')
+        .order('usage_count', { ascending: false })
+        .limit(50);
+      
+      if (data && data.length > 0) {
+        const fallbackBins = data.map(bin => ({
+          id: bin.id,
+          coordinates: [bin.bin_lng, bin.bin_lat] as [number, number],
+          name: bin.bin_name
+        }));
+        setTrashCans(fallbackBins);
+        toast.info('Showing popular bins from community data');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Fallback bins failed:', error);
+      return false;
+    }
+  };
+
   const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
     setIsLoadingBins(true);
     try {
       const overpassQuery = `
-        [out:json][timeout:25];
+        [out:json][timeout:10];
         (
           node["amenity"="waste_basket"](around:${radiusMeters},${lat},${lon});
         );
@@ -131,17 +157,22 @@ const Map = () => {
     } catch (error) {
       console.error('Error fetching trash cans:', error);
       
-      // Better error messages
-      if (error instanceof Error) {
-        if (error.message.includes('429')) {
-          toast.error("Too many requests — wait a moment and try again");
-        } else if (error.message.includes('timeout')) {
-          toast.error("Connection timed out — check your internet");
+      // Try fallback bins from database
+      const fallbackSuccess = await fetchFallbackBins();
+      
+      if (!fallbackSuccess) {
+        // Better error messages
+        if (error instanceof Error) {
+          if (error.message.includes('429')) {
+            toast.error("Too many requests — wait a moment and try again");
+          } else if (error.message.includes('timeout')) {
+            toast.error("Connection timed out — check your internet");
+          } else {
+            toast.error("Couldn't load bins — tap to retry");
+          }
         } else {
-          toast.error("Couldn't load bins — tap to retry");
+          toast.error("Oops! Let's try that again");
         }
-      } else {
-        toast.error("Oops! Let's try that again");
       }
     } finally {
       setIsLoadingBins(false);
@@ -213,6 +244,16 @@ const Map = () => {
         await fetchNearbyTrashCans(userCoords[1], userCoords[0], initialRadius);
 
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        
+        // Set map as loaded
+        map.current.on('load', () => {
+          setIsMapLoading(false);
+        });
+        
+        // If map is already loaded, update state
+        if (map.current.loaded()) {
+          setIsMapLoading(false);
+        }
 
         // Add event listeners for dynamic bin loading
         map.current.on('moveend', () => {
@@ -505,6 +546,24 @@ const Map = () => {
   return (
     <div className="relative w-full h-screen">
       <div ref={mapContainer} className="absolute inset-0" />
+      
+      {isMapLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto"></div>
+            <p className="text-muted-foreground">Loading map...</p>
+          </div>
+        </div>
+      )}
+      
+      {isLoadingBins && !isMapLoading && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg border border-border/50 z-10">
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+            Finding bins nearby...
+          </p>
+        </div>
+      )}
       
       <div className="absolute top-6 left-6 z-10 bg-card/90 backdrop-blur-xl rounded-2xl p-3 shadow-lg border border-border/50">
         <img src={logo} alt="bin there" className="h-10 w-auto" />
