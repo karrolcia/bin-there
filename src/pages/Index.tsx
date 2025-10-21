@@ -17,10 +17,10 @@ const Index = () => {
             bin there
           </h1>
           <p className="text-xl md:text-2xl font-normal text-foreground/80 leading-relaxed" style={{ animationDelay: '0.2s' }}>
-            Every bin is a small step toward a greener world
+            You picked it up. Now bin it like a boss. 🐕
           </p>
           <p className="text-sm font-light italic text-muted-foreground" style={{ animationDelay: '0.3s' }}>
-            Ready to make a difference?
+            Because nobody likes stepping in surprises
           </p>
         </div>
 

@@ -17,15 +17,15 @@ export const BinSuccessModal = ({ open, onClose }: BinSuccessModalProps) => {
           </div>
           
           <h2 className="text-3xl font-medium text-foreground">
-            Nice work!
+            You're a neighborhood hero! 🐾
           </h2>
           
           <p className="text-lg text-muted-foreground leading-relaxed max-w-sm mx-auto">
-            You just made the world a little greener. Every bin counts. 🌱
+            Thanks to you, nobody's stepping in surprises today. Your neighbors (and their shoes) appreciate you! 🐕
           </p>
           
           <p className="text-sm text-muted-foreground italic">
-            Together, we're building better habits
+            Every responsible dog owner makes the neighborhood better for everyone
           </p>
           
           <Button

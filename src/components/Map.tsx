@@ -55,9 +55,9 @@ const Map = () => {
       setTrashCans(bins);
       
       if (bins.length === 0) {
-        toast.info("Hmm, no bins here yet. Try zooming out?");
+        toast.info("Hmm, no bins nearby yet. Try zooming out? (You're still a hero for picking it up!) 🐶");
       } else {
-        toast.success(`Great! There are ${bins.length} bins waiting for you`);
+        toast.success(`Perfect! ${bins.length} bins nearby for that poop bag 🐕`);
       }
     } catch (error) {
       console.error('Error fetching trash cans:', error);
@@ -258,7 +258,7 @@ const Map = () => {
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
     
-    toast.success(`Perfect! Just ${distanceText} away - a quick ${durationText} stroll`);
+    toast.success(`${distanceText} away - just ${durationText}. Your pup can stretch their legs! 🐾`);
   };
 
   const handleBinnedIt = () => {
@@ -291,6 +291,7 @@ const Map = () => {
       <div ref={mapContainer} className="absolute inset-0" />
       
       <div className="absolute top-6 left-6 z-10 bg-white/80 backdrop-blur-xl px-5 py-2.5 rounded-2xl shadow-md border border-border/30 flex items-center gap-2">
+        <span className="text-lg">🐾</span>
         <span className="text-lg">🌱</span>
         <h1 className="text-base font-medium text-foreground">bin there</h1>
       </div>
@@ -306,7 +307,7 @@ const Map = () => {
               <Compass className="w-4 h-4" />
               {isLoadingBins ? 'Searching nearby...' : 'Find Nearest Bin'}
             </Button>
-            <p className="text-xs text-muted-foreground italic">Let's find your nearest bin</p>
+            <p className="text-xs text-muted-foreground italic">Got a poop bag? Let's find the perfect spot</p>
           </div>
         ) : (
           <>
@@ -341,7 +342,7 @@ const Map = () => {
           <div className="text-sm text-muted-foreground">
             About {Math.ceil(routeInfo.duration / 60)} min
           </div>
-          <p className="text-xs text-primary/70 italic mt-2">You've got this! 💚</p>
+          <p className="text-xs text-primary/70 italic mt-2">Quick detour - your neighbors will thank you! 🐾</p>
         </div>
       )}
       
