@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Map from '@/components/Map';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { StatsDisplay } from '@/components/StatsDisplay';
-import { LogIn } from 'lucide-react';
+import { LogIn, HelpCircle } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 
 const Index = () => {
@@ -44,19 +45,35 @@ const Index = () => {
             onClick={() => setShowMap(true)}
             className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-medium h-auto shadow-lg hover:shadow-xl transition-all duration-300 fade-up-enter"
             style={{ animationDelay: '0.3s' }}
+            aria-label="Start finding nearby trash cans"
           >
             Bin It
           </Button>
           
-          <Button
-            onClick={() => setShowAuthModal(true)}
-            variant="outline"
-            className="fade-up-enter flex items-center gap-2"
-            style={{ animationDelay: '0.4s' }}
-          >
-            <LogIn className="w-4 h-4" />
-            Track Your Impact
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowAuthModal(true)}
+              variant="outline"
+              className="fade-up-enter flex items-center gap-2"
+              style={{ animationDelay: '0.4s' }}
+              aria-label="Sign in to track your environmental impact"
+            >
+              <LogIn className="w-4 h-4" />
+              Track Your Impact
+            </Button>
+            
+            <Link to="/faq">
+              <Button
+                variant="outline"
+                className="fade-up-enter flex items-center gap-2"
+                style={{ animationDelay: '0.5s' }}
+                aria-label="View frequently asked questions"
+              >
+                <HelpCircle className="w-4 h-4" />
+                FAQ
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
       
