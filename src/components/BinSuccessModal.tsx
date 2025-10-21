@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 import logo from '@/assets/logo.svg';
@@ -19,13 +19,13 @@ export const BinSuccessModal = ({ open, onClose }: BinSuccessModalProps) => {
             <CheckCircle className="w-12 h-12 text-success" strokeWidth={2.5} />
           </div>
           
-          <h2 className="text-2xl font-medium text-foreground">
+          <DialogTitle className="text-2xl font-medium text-foreground">
             Nice work!
-          </h2>
+          </DialogTitle>
           
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-sm mx-auto">
+          <DialogDescription className="text-lg text-muted-foreground leading-relaxed max-w-sm mx-auto">
             Clean streets. Happy neighbors. You did that.
-          </p>
+          </DialogDescription>
           
           <Button
             onClick={onClose}
