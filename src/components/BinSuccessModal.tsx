@@ -1,14 +1,16 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Flame, Trash2 } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 
 interface BinSuccessModalProps {
   open: boolean;
   onClose: () => void;
+  totalBins?: number;
+  streakDays?: number;
 }
 
-export const BinSuccessModal = ({ open, onClose }: BinSuccessModalProps) => {
+export const BinSuccessModal = ({ open, onClose, totalBins, streakDays }: BinSuccessModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="spring-enter bg-card border-border">
@@ -26,6 +28,22 @@ export const BinSuccessModal = ({ open, onClose }: BinSuccessModalProps) => {
           <DialogDescription className="text-lg text-muted-foreground leading-relaxed max-w-sm mx-auto">
             Clean streets. Happy neighbors. You did that.
           </DialogDescription>
+          
+          {totalBins !== undefined && totalBins > 0 && (
+            <div className="flex items-center justify-center gap-6 py-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                <Trash2 className="w-5 h-5 text-primary" />
+                <span className="font-semibold text-foreground">{totalBins} bin{totalBins !== 1 ? 's' : ''}</span>
+              </div>
+              
+              {streakDays !== undefined && streakDays > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-full">
+                  <Flame className="w-5 h-5 text-orange-500" />
+                  <span className="font-semibold text-foreground">{streakDays} day{streakDays !== 1 ? 's' : ''}</span>
+                </div>
+              )}
+            </div>
+          )}
           
           <Button
             onClick={onClose}

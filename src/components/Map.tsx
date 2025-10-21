@@ -7,8 +7,9 @@ import { celebrateBinning } from '@/utils/confetti';
 import { BinSuccessModal } from './BinSuccessModal';
 import { Compass, Heart, Trash2 } from 'lucide-react';
 import logo from '@/assets/logo.svg';
+import { supabase } from '@/integrations/supabase/client';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
 
 interface TrashCan {
   id: number | string;
@@ -27,6 +28,8 @@ const Map = () => {
   const [routeInfo, setRouteInfo] = useState<{distance: number, duration: number} | null>(null);
   const [showBinnedButton, setShowBinnedButton] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [userStats, setUserStats] = useState<{totalBins: number, streakDays: number} | null>(null);
+  const [nearestBin, setNearestBin] = useState<TrashCan | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
@@ -272,6 +275,8 @@ const Map = () => {
       prev.distance < current.distance ? prev : current
     );
     
+    setNearestBin(nearest);
+    
     const route = await getWalkingRoute(userLocation, nearest.coordinates);
     
     if (!route) return;
@@ -326,8 +331,37 @@ const Map = () => {
     toast.success(`There you go. Bin it with pride!`);
   };
 
-  const handleBinnedIt = () => {
+  const handleBinnedIt = async () => {
     celebrateBinning();
+    
+    // Track the bin event in backend
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const authHeader = session?.access_token ? `Bearer ${session.access_token}` : undefined;
+      
+      const { data, error } = await supabase.functions.invoke('track-bin-event', {
+        body: {
+          binLat: nearestBin?.coordinates[1],
+          binLng: nearestBin?.coordinates[0],
+          binName: nearestBin?.name || 'Unknown Bin',
+          routeDistance: routeInfo?.distance,
+          routeDuration: routeInfo?.duration,
+        },
+        headers: authHeader ? { Authorization: authHeader } : undefined,
+      });
+
+      if (error) {
+        console.error('Error tracking bin event:', error);
+      } else if (data) {
+        setUserStats({
+          totalBins: data.totalBins || 0,
+          streakDays: data.streakDays || 0,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to track bin event:', error);
+    }
+    
     setShowSuccessModal(true);
     
     if (map.current?.getSource('route')) {
@@ -406,7 +440,12 @@ const Map = () => {
         </div>
       )}
       
-      <BinSuccessModal open={showSuccessModal} onClose={handleCloseSuccessModal} />
+      <BinSuccessModal 
+        open={showSuccessModal} 
+        onClose={handleCloseSuccessModal}
+        totalBins={userStats?.totalBins}
+        streakDays={userStats?.streakDays}
+      />
     </div>
   );
 };

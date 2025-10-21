@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import Map from '@/components/Map';
 import { Button } from '@/components/ui/button';
+import { AuthModal } from '@/components/AuthModal';
+import { StatsDisplay } from '@/components/StatsDisplay';
+import { LogIn } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 
 const Index = () => {
   const [showMap, setShowMap] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   if (showMap) {
-    return <Map />;
+    return (
+      <>
+        <StatsDisplay />
+        <Map />
+      </>
+    );
   }
 
   return (
@@ -30,14 +39,35 @@ const Index = () => {
           </div>
         </div>
 
-        <Button
-          onClick={() => setShowMap(true)}
-          className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-medium h-auto shadow-lg hover:shadow-xl transition-all duration-300 fade-up-enter"
-          style={{ animationDelay: '0.3s' }}
-        >
-          Bin It
-        </Button>
+        <div className="flex flex-col items-center gap-4">
+          <Button
+            onClick={() => setShowMap(true)}
+            className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-medium h-auto shadow-lg hover:shadow-xl transition-all duration-300 fade-up-enter"
+            style={{ animationDelay: '0.3s' }}
+          >
+            Bin It
+          </Button>
+          
+          <Button
+            onClick={() => setShowAuthModal(true)}
+            variant="outline"
+            className="fade-up-enter flex items-center gap-2"
+            style={{ animationDelay: '0.4s' }}
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In to Track Impact
+          </Button>
+        </div>
       </div>
+      
+      <AuthModal 
+        open={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          setShowMap(true);
+        }}
+      />
     </div>
   );
 };
