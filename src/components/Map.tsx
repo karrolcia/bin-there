@@ -409,8 +409,7 @@ const Map = () => {
           <>
             <Button
               onClick={handleBinIt}
-              variant="outline"
-              className="bg-white/90 hover:bg-white text-foreground shadow-lg px-6 py-6 h-auto text-base font-medium border-border"
+              className="bg-white/90 hover:bg-white text-gray-900 hover:text-gray-900 shadow-lg px-6 py-6 h-auto text-base font-medium border border-border"
             >
               Find Another
             </Button>
