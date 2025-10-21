@@ -344,16 +344,12 @@ const Map = () => {
     <div className="relative w-full h-screen">
       <div ref={mapContainer} className="absolute inset-0" />
       
-      <div className="absolute top-6 left-6 z-10 bg-card/90 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-lg border border-border/50 flex items-center gap-3">
+      <div className="absolute top-6 left-6 z-10 bg-card/90 backdrop-blur-xl rounded-2xl p-3 shadow-lg border border-border/50">
         <img 
           src={logo} 
           alt="bin there" 
-          className="h-8 w-auto"
+          className="h-10 w-auto"
         />
-        <div className="flex flex-col">
-          <span className="font-medium text-lg text-foreground">bin there</span>
-          <span className="text-xs text-muted-foreground">🐾 Dog walker's companion</span>
-        </div>
       </div>
       
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
