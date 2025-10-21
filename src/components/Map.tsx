@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from './ui/button';
@@ -8,6 +8,15 @@ import { BinSuccessModal } from './BinSuccessModal';
 import { Compass, Heart, Trash2 } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { supabase } from '@/integrations/supabase/client';
+
+// Debounce utility
+const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
 
@@ -30,7 +39,31 @@ const Map = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userStats, setUserStats] = useState<{totalBins: number, streakDays: number} | null>(null);
   const [nearestBin, setNearestBin] = useState<TrashCan | null>(null);
+  const [currentZoom, setCurrentZoom] = useState(16);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const getRadiusForZoom = (zoom: number): number => {
+    if (zoom < 14) return 5000;
+    if (zoom < 16) return 2000;
+    if (zoom < 18) return 1000;
+    return 500;
+  };
+
+  const calculateDistance = (coord1: [number, number], coord2: [number, number]) => {
+    const R = 6371e3;
+    const φ1 = coord1[1] * Math.PI / 180;
+    const φ2 = coord2[1] * Math.PI / 180;
+    const Δφ = (coord2[1] - coord1[1]) * Math.PI / 180;
+    const Δλ = (coord2[0] - coord1[0]) * Math.PI / 180;
+    
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    
+    return R * c;
+  };
 
   const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
     setIsLoadingBins(true);
@@ -58,7 +91,22 @@ const Map = () => {
         name: element.tags?.name || 'Public Bin',
       }));
       
-      setTrashCans(bins);
+      // Limit bins if too many
+      let binsToShow = bins;
+      if (bins.length > 50 && userLocation) {
+        const binsWithDistance = bins.map(bin => ({
+          ...bin,
+          distance: calculateDistance(userLocation, bin.coordinates)
+        }));
+        
+        binsToShow = binsWithDistance
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 50);
+        
+        toast.info(`Showing 50 nearest bins (${bins.length} total in area)`);
+      }
+      
+      setTrashCans(binsToShow);
       
       if (bins.length === 0) {
         toast.info("No bins here just yet — keep walking!");
@@ -134,9 +182,37 @@ const Map = () => {
         
         userMarkerRef.current = userMarker;
 
-        await fetchNearbyTrashCans(userCoords[1], userCoords[0], 1000);
+        const initialRadius = getRadiusForZoom(16);
+        await fetchNearbyTrashCans(userCoords[1], userCoords[0], initialRadius);
 
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+        // Add event listeners for dynamic bin loading
+        map.current.on('moveend', () => {
+          if (!map.current) return;
+          const center = map.current.getCenter();
+          const zoom = map.current.getZoom();
+          setCurrentZoom(zoom);
+          const radius = getRadiusForZoom(zoom);
+          
+          clearTimeout(fetchTimeoutRef.current);
+          fetchTimeoutRef.current = setTimeout(() => {
+            fetchNearbyTrashCans(center.lat, center.lng, radius);
+          }, 500);
+        });
+
+        map.current.on('zoomend', () => {
+          if (!map.current) return;
+          const center = map.current.getCenter();
+          const zoom = map.current.getZoom();
+          setCurrentZoom(zoom);
+          const radius = getRadiusForZoom(zoom);
+          
+          clearTimeout(fetchTimeoutRef.current);
+          fetchTimeoutRef.current = setTimeout(() => {
+            fetchNearbyTrashCans(center.lat, center.lng, radius);
+          }, 500);
+        });
       },
       (error) => {
         console.error('Geolocation error:', error);
@@ -204,9 +280,32 @@ const Map = () => {
       });
       markersRef.current = [];
 
-      trashCans.forEach((trash) => {
+      // Get computed primary color from CSS variables
+      const primaryColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary')
+        .trim();
+      const primaryColorHSL = `hsl(${primaryColor})`;
+
+      trashCans.forEach((trash, index) => {
         const binMarkerEl = document.createElement('div');
-        binMarkerEl.className = 'w-9 h-9 bg-primary rounded-full flex items-center justify-center shadow-xl border-3 border-gray-800 bounce-enter';
+        
+        // Use inline styles for proper rendering
+        binMarkerEl.style.cssText = `
+          width: 36px;
+          height: 36px;
+          background-color: ${primaryColorHSL};
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          border: 3px solid rgb(31, 41, 55);
+          cursor: pointer;
+          z-index: 1;
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
+        `;
+        
         binMarkerEl.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 6h18"/>
@@ -225,6 +324,12 @@ const Map = () => {
             )
           )
           .addTo(map.current!);
+        
+        // Fade in with stagger
+        setTimeout(() => {
+          binMarkerEl.style.opacity = '1';
+        }, 50 + (index * 30));
+        
         markersRef.current.push(marker);
       });
     };
@@ -250,21 +355,6 @@ const Map = () => {
       toast.info('No bins here just yet — keep walking!');
       return;
     }
-    
-    const calculateDistance = (coord1: [number, number], coord2: [number, number]) => {
-      const R = 6371e3;
-      const φ1 = coord1[1] * Math.PI / 180;
-      const φ2 = coord2[1] * Math.PI / 180;
-      const Δφ = (coord2[1] - coord1[1]) * Math.PI / 180;
-      const Δλ = (coord2[0] - coord1[0]) * Math.PI / 180;
-      
-      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) * Math.sin(Δλ/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      
-      return R * c;
-    };
     
     const distances = trashCans.map((trash) => ({
       ...trash,
