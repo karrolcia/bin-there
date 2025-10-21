@@ -5,7 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
+import { trackAuthEvent } from '@/utils/activityTracker';
 import logo from '@/assets/logo.svg';
+
+// Validation schema
+const authSchema = z.object({
+  email: z.string().email('Invalid email address').trim().max(255, 'Email too long'),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(72, 'Password too long'),
+});
 
 interface AuthModalProps {
   open: boolean;
@@ -25,10 +33,26 @@ export const AuthModal = ({ open, onClose, onSuccess }: AuthModalProps) => {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const result = authSchema.safeParse({ email, password });
+      
+      if (!result.success) {
+        const firstError = result.error.errors[0];
+        toast({
+          variant: "destructive",
+          title: "Invalid input",
+          description: firstError.message,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const validatedData = result.data;
+
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: validatedData.email,
+          password: validatedData.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -40,10 +64,13 @@ export const AuthModal = ({ open, onClose, onSuccess }: AuthModalProps) => {
           title: "Account created!",
           description: "You're all set. Start binning!",
         });
+        
+        // Track signup
+        trackAuthEvent('signup');
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validatedData.email,
+          password: validatedData.password,
         });
 
         if (error) throw error;
@@ -52,6 +79,9 @@ export const AuthModal = ({ open, onClose, onSuccess }: AuthModalProps) => {
           title: "Welcome back!",
           description: "Ready to make a difference?",
         });
+        
+        // Track login
+        trackAuthEvent('login');
       }
 
       onSuccess();
@@ -107,8 +137,9 @@ export const AuthModal = ({ open, onClose, onSuccess }: AuthModalProps) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                minLength={6}
+                minLength={8}
               />
+              <p className="text-xs text-muted-foreground">At least 8 characters</p>
             </div>
 
             <Button

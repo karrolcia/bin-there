@@ -8,6 +8,7 @@ import { BinSuccessModal } from './BinSuccessModal';
 import { Compass, Heart, Trash2 } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { supabase } from '@/integrations/supabase/client';
+import { trackAppOpened, trackBinSearched, trackBinMarked, trackRouteCalculated, trackLocationEvent } from '@/utils/activityTracker';
 
 // Debounce utility
 const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
@@ -114,6 +115,10 @@ const Map = () => {
 
   const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
     setIsLoadingBins(true);
+    
+    // Track bin search
+    trackBinSearched([lon, lat], radiusMeters);
+    
     try {
       const overpassQuery = `
         [out:json][timeout:10];
@@ -217,6 +222,10 @@ const Map = () => {
           position.coords.latitude,
         ];
         setUserLocation(userCoords);
+        
+        // Track location enabled and app opened
+        trackLocationEvent(true, userCoords);
+        trackAppOpened(userCoords);
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
@@ -287,6 +296,11 @@ const Map = () => {
         toast.error('Please enable location services');
         
         const fallbackCoords: [number, number] = [24.9384, 60.1699];
+        
+        // Track location denied and app opened without location
+        trackLocationEvent(false);
+        trackAppOpened(fallbackCoords);
+        
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
           style: 'mapbox://styles/mapbox/light-v11',
@@ -486,11 +500,19 @@ const Map = () => {
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
     
+    // Track route calculated
+    trackRouteCalculated(route.distance, route.duration);
+    
     toast.success(`There you go. Bin it with pride!`);
   };
 
   const handleBinnedIt = async () => {
     celebrateBinning();
+    
+    // Track bin marked event
+    if (nearestBin) {
+      trackBinMarked(nearestBin.coordinates, nearestBin.name);
+    }
     
     // Track the bin event in backend
     try {

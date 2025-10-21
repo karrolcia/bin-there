@@ -1,10 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const binEventSchema = z.object({
+  binLat: z.number().min(-90).max(90),
+  binLng: z.number().min(-180).max(180),
+  binName: z.string().trim().min(1).max(200),
+  routeDistance: z.number().min(0).optional(),
+  routeDuration: z.number().min(0).optional(),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -32,7 +42,22 @@ serve(async (req) => {
       userId = user?.id || null;
     }
 
-    const { binLat, binLng, binName, routeDistance, routeDuration } = await req.json();
+    // Parse and validate input
+    const body = await req.json();
+    const result = binEventSchema.safeParse(body);
+    
+    if (!result.success) {
+      console.error('Validation error:', result.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          details: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { binLat, binLng, binName, routeDistance, routeDuration } = result.data;
 
     console.log('Tracking bin event:', { userId, binLat, binLng, binName });
 
@@ -169,8 +194,19 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error in track-bin-event:', error);
+    
+    // Sanitize error messages for client
+    let clientMessage = 'An error occurred while tracking your bin event';
+    if (error instanceof Error) {
+      if (error.message.includes('duplicate key')) {
+        clientMessage = 'This bin has already been recorded recently';
+      } else if (error.message.includes('foreign key')) {
+        clientMessage = 'Invalid reference data';
+      }
+    }
+    
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: clientMessage }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

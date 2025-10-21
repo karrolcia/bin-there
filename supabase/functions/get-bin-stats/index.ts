@@ -51,7 +51,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in get-bin-stats:', error);
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: 'Failed to fetch bin statistics' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

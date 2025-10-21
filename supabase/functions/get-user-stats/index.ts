@@ -60,8 +60,17 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error in get-user-stats:', error);
+    
+    // Sanitize error messages for client
+    let clientMessage = 'Failed to fetch user statistics';
+    if (error instanceof Error) {
+      if (error.message.includes('Unauthorized') || error.message.includes('authorization')) {
+        clientMessage = 'Please sign in to view your stats';
+      }
+    }
+    
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: clientMessage }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
