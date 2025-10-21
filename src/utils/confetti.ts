@@ -1,8 +1,8 @@
 import confetti from 'canvas-confetti';
 
 export const celebrateBinning = () => {
-  // Earthy tones color palette
-  const colors = ['#8B7355', '#6B8E6F', '#C4A572', '#A68B5B', '#7FA881'];
+  // Nature-inspired color palette
+  const colors = ['#7BA57D', '#5D9B8C', '#A4C2A8', '#D4E4D7', '#F5E6CA'];
   
   // Add paw print and leaf shapes
   const pawPrint = confetti.shapeFromText({ text: '🐾', scalar: 2 });
