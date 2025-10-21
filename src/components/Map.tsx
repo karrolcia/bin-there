@@ -111,13 +111,13 @@ const Map = () => {
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/outdoors-v12',
+          style: 'mapbox://styles/mapbox/light-v11',
           center: userCoords,
           zoom: 16,
         });
 
         const userMarkerEl = document.createElement('div');
-        userMarkerEl.className = 'w-6 h-6 bg-accent rounded-full border-4 border-white shadow-lg';
+        userMarkerEl.className = 'w-6 h-6 bg-accent rounded-full border-4 border-gray-800 shadow-xl';
         userMarkerEl.style.animation = 'pulse-subtle 2s ease-in-out infinite';
         
         const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
@@ -138,7 +138,7 @@ const Map = () => {
         const fallbackCoords: [number, number] = [24.9384, 60.1699];
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/outdoors-v12',
+          style: 'mapbox://styles/mapbox/light-v11',
           center: fallbackCoords,
           zoom: 16,
         });
@@ -199,7 +199,7 @@ const Map = () => {
 
       trashCans.forEach((trash) => {
         const binMarkerEl = document.createElement('div');
-        binMarkerEl.className = 'w-9 h-9 bg-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white bounce-enter';
+        binMarkerEl.className = 'w-9 h-9 bg-primary rounded-full flex items-center justify-center shadow-xl border-3 border-gray-800 bounce-enter';
         binMarkerEl.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 6h18"/>
@@ -295,7 +295,7 @@ const Map = () => {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': '#5D9B8C',
+        'line-color': '#4A7C6F',
         'line-width': 5,
         'line-opacity': 0.9,
       },
