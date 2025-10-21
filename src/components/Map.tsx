@@ -117,8 +117,12 @@ const Map = () => {
         });
 
         const userMarkerEl = document.createElement('div');
-        userMarkerEl.className = 'w-6 h-6 bg-accent rounded-full border-4 border-gray-800 shadow-xl';
-        userMarkerEl.style.animation = 'pulse-subtle 2s ease-in-out infinite';
+        userMarkerEl.className = 'w-10 h-10 bg-accent rounded-full flex items-center justify-center border-3 border-gray-800 shadow-xl';
+        userMarkerEl.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+          </svg>
+        `;
         
         const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
           .setLngLat(userCoords)
