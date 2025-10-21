@@ -13,27 +13,29 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
-        <div className="space-y-6 fade-up-enter">
+        <div className="space-y-8 fade-up-enter">
           <img 
             src={logo} 
             alt="bin there" 
-            className="h-16 md:h-20 mx-auto" 
-            style={{ animationDelay: '0.1s' }}
+            className="h-28 md:h-36 mx-auto" 
+            style={{ animationDelay: '0s' }}
           />
-          <p className="text-xl md:text-2xl font-normal text-foreground/80 leading-relaxed" style={{ animationDelay: '0.2s' }}>
-            You picked it up. Now bin it like a boss.
-          </p>
-          <p className="text-sm font-light italic text-muted-foreground" style={{ animationDelay: '0.3s' }}>
-            Because nobody likes stepping in surprises
-          </p>
+          <div className="space-y-2">
+            <p className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed" style={{ animationDelay: '0.1s' }}>
+              Find a bin. Walk on happy.
+            </p>
+            <p className="text-lg md:text-xl text-muted-foreground" style={{ animationDelay: '0.2s' }}>
+              Simple. Fast. Clean.
+            </p>
+          </div>
         </div>
 
         <Button
           onClick={() => setShowMap(true)}
           className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-medium h-auto shadow-lg hover:shadow-xl transition-all duration-300 fade-up-enter"
-          style={{ animationDelay: '0.4s' }}
+          style={{ animationDelay: '0.3s' }}
         >
-          Start Your Quest
+          Bin It
         </Button>
       </div>
     </div>

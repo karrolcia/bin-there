@@ -58,9 +58,9 @@ const Map = () => {
       setTrashCans(bins);
       
       if (bins.length === 0) {
-        toast.info("Hmm, no bins nearby yet. Try zooming out?");
+        toast.info("No bins here just yet — keep walking!");
       } else {
-        toast.success(`Perfect! ${bins.length} bins nearby`);
+        toast.success(`${bins.length} bins nearby`);
       }
     } catch (error) {
       console.error('Error fetching trash cans:', error);
@@ -235,12 +235,12 @@ const Map = () => {
 
   const handleBinIt = async () => {
     if (!userLocation) {
-      toast.info('Just a moment, finding your location...');
+      toast.info('Finding you…');
       return;
     }
     
     if (trashCans.length === 0) {
-      toast.info('No bins found nearby. Try zooming out?');
+      toast.info('No bins here just yet — keep walking!');
       return;
     }
     
@@ -319,7 +319,7 @@ const Map = () => {
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
     
-    toast.success(`${distanceText} away - just ${durationText}`);
+    toast.success(`There you go. Bin it with pride!`);
   };
 
   const handleBinnedIt = () => {
@@ -364,9 +364,8 @@ const Map = () => {
               className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl px-8 py-6 h-auto text-base font-medium transition-all duration-300 flex items-center gap-2"
             >
               <Compass className="w-5 h-5" />
-              {isLoadingBins ? 'Searching nearby...' : 'Find Nearest Bin'}
+              {isLoadingBins ? 'Locating the nearest bin…' : 'Find Nearest Bin'}
             </Button>
-            <p className="text-xs text-muted-foreground italic">Find the nearest bin</p>
           </div>
         ) : (
           <>

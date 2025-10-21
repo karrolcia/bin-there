@@ -19,23 +19,19 @@ export const BinSuccessModal = ({ open, onClose }: BinSuccessModalProps) => {
             <CheckCircle className="w-12 h-12 text-success" strokeWidth={2.5} />
           </div>
           
-          <h2 className="text-3xl font-medium text-foreground">
-            You're a neighborhood hero!
+          <h2 className="text-2xl font-medium text-foreground">
+            Nice work!
           </h2>
           
           <p className="text-lg text-muted-foreground leading-relaxed max-w-sm mx-auto">
-            Thanks to you, nobody's stepping in surprises today. Your neighbors appreciate you!
-          </p>
-          
-          <p className="text-sm text-muted-foreground italic">
-            Every responsible dog owner makes the neighborhood better for everyone
+            Clean streets. Happy neighbors. You did that.
           </p>
           
           <Button
             onClick={onClose}
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 h-auto text-base"
           >
-            Find Another
+            Find Another Bin
           </Button>
         </div>
       </DialogContent>
