@@ -3,6 +3,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { celebrateBinning } from '@/utils/confetti';
+import { BinSuccessModal } from './BinSuccessModal';
+import { Compass, Heart } from 'lucide-react';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
 
@@ -20,6 +23,7 @@ const Map = () => {
   const [isLoadingBins, setIsLoadingBins] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{distance: number, duration: number} | null>(null);
   const [showBinnedButton, setShowBinnedButton] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const fetchNearbyTrashCans = async (lat: number, lon: number, radiusMeters: number = 1000) => {
@@ -51,13 +55,13 @@ const Map = () => {
       setTrashCans(bins);
       
       if (bins.length === 0) {
-        toast.info('No bins found nearby');
+        toast.info("Hmm, no bins here yet. Try zooming out?");
       } else {
-        toast.success(`Found ${bins.length} bins nearby`);
+        toast.success(`Great! There are ${bins.length} bins waiting for you`);
       }
     } catch (error) {
       console.error('Error fetching trash cans:', error);
-      toast.error('Could not load nearby bins');
+      toast.error("Oops! Let's try that again");
     } finally {
       setIsLoadingBins(false);
     }
@@ -84,7 +88,7 @@ const Map = () => {
       return null;
     } catch (error) {
       console.error('Error fetching walking route:', error);
-      toast.error('Could not calculate route');
+      toast.error("Oops! Let's try that again");
       return null;
     }
   };
@@ -104,12 +108,16 @@ const Map = () => {
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/light-v11',
+          style: 'mapbox://styles/mapbox/outdoors-v12',
           center: userCoords,
           zoom: 16,
         });
 
-        new mapboxgl.Marker({ color: '#2A2A2A' })
+        const userMarkerEl = document.createElement('div');
+        userMarkerEl.className = 'w-6 h-6 bg-accent rounded-full border-4 border-white shadow-lg';
+        userMarkerEl.style.animation = 'pulse-subtle 2s ease-in-out infinite';
+        
+        new mapboxgl.Marker({ element: userMarkerEl })
           .setLngLat(userCoords)
           .setPopup(new mapboxgl.Popup().setHTML('<p class="text-sm font-medium">You are here</p>'))
           .addTo(map.current);
@@ -125,7 +133,7 @@ const Map = () => {
         const fallbackCoords: [number, number] = [24.9384, 60.1699];
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/light-v11',
+          style: 'mapbox://styles/mapbox/outdoors-v12',
           center: fallbackCoords,
           zoom: 16,
         });
@@ -147,7 +155,12 @@ const Map = () => {
     markersRef.current = [];
 
     trashCans.forEach((trash) => {
-      const marker = new mapboxgl.Marker({ color: '#6B6B6B' })
+      const binMarkerEl = document.createElement('div');
+      binMarkerEl.innerHTML = '♻️';
+      binMarkerEl.className = 'text-2xl bounce-enter';
+      binMarkerEl.style.filter = 'drop-shadow(0 2px 8px rgba(100, 130, 110, 0.3))';
+      
+      const marker = new mapboxgl.Marker({ element: binMarkerEl })
         .setLngLat(trash.coordinates)
         .setPopup(
           new mapboxgl.Popup().setHTML(
@@ -161,12 +174,12 @@ const Map = () => {
 
   const handleBinIt = async () => {
     if (!userLocation) {
-      toast.error('Waiting for your location...');
+      toast.info('Just a moment, finding your location...');
       return;
     }
     
     if (trashCans.length === 0) {
-      toast.error('No bins found nearby');
+      toast.info('No bins found nearby. Try zooming out?');
       return;
     }
     
@@ -221,8 +234,9 @@ const Map = () => {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': '#2A2A2A',
-        'line-width': 4,
+        'line-color': '#5D9B8C',
+        'line-width': 5,
+        'line-opacity': 0.9,
       },
     });
     
@@ -244,11 +258,12 @@ const Map = () => {
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
     
-    toast.success(`${distanceText} away (${durationText} walk)`);
+    toast.success(`Perfect! Just ${distanceText} away - a quick ${durationText} stroll`);
   };
 
   const handleBinnedIt = () => {
-    toast.success('Thanks for keeping it clean!');
+    celebrateBinning();
+    setShowSuccessModal(true);
     
     if (map.current?.getSource('route')) {
       map.current.removeLayer('route');
@@ -257,6 +272,10 @@ const Map = () => {
     
     setRouteInfo(null);
     setShowBinnedButton(false);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
     
     if (userLocation) {
       map.current?.flyTo({
@@ -271,51 +290,62 @@ const Map = () => {
     <div className="relative w-full h-screen">
       <div ref={mapContainer} className="absolute inset-0" />
       
-      <div className="absolute top-6 left-6 z-10 bg-white/95 backdrop-blur px-4 py-2 rounded-md shadow-sm">
-        <h1 className="text-xl font-semibold text-foreground">bin there</h1>
+      <div className="absolute top-6 left-6 z-10 bg-white/80 backdrop-blur-xl px-5 py-2.5 rounded-2xl shadow-md border border-border/30 flex items-center gap-2">
+        <span className="text-lg">🌱</span>
+        <h1 className="text-base font-medium text-foreground">bin there</h1>
       </div>
       
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
         {!showBinnedButton ? (
-          <Button
-            onClick={handleBinIt}
-            disabled={isLoadingBins || trashCans.length === 0}
-            className="bg-foreground hover:bg-foreground/90 text-background shadow-lg px-8 py-6 h-auto text-base font-medium"
-          >
-            {isLoadingBins ? 'Loading bins...' : 'Bin It'}
-          </Button>
+          <div className="flex flex-col items-center gap-2">
+            <Button
+              onClick={handleBinIt}
+              disabled={isLoadingBins || trashCans.length === 0}
+              className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl px-8 py-6 h-auto text-base font-medium transition-all duration-300 flex items-center gap-2"
+            >
+              <Compass className="w-4 h-4" />
+              {isLoadingBins ? 'Searching nearby...' : 'Find Nearest Bin'}
+            </Button>
+            <p className="text-xs text-muted-foreground italic">Let's find your nearest bin</p>
+          </div>
         ) : (
           <>
             <Button
               onClick={handleBinIt}
               variant="outline"
-              className="bg-white hover:bg-gray-50 text-foreground shadow-lg px-6 py-6 h-auto text-base font-medium"
+              className="bg-white/90 hover:bg-white text-foreground shadow-lg px-6 py-6 h-auto text-base font-medium border-border"
             >
               Find Another
             </Button>
             <Button
               onClick={handleBinnedIt}
-              className="bg-foreground hover:bg-foreground/90 text-background shadow-lg px-8 py-6 h-auto text-base font-medium"
+              className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl px-8 py-6 h-auto text-base font-medium transition-all duration-300 flex items-center gap-2"
             >
-              Binned It
+              <Heart className="w-4 h-4" />
+              Binned It!
             </Button>
           </>
         )}
       </div>
       
       {routeInfo && (
-        <div className="absolute top-6 right-6 z-10 bg-white/95 backdrop-blur px-4 py-3 rounded-md shadow-sm">
-          <div className="text-sm text-muted-foreground">Distance</div>
-          <div className="text-lg font-semibold">
-            {routeInfo.distance < 1000 
-              ? `${Math.round(routeInfo.distance)}m` 
-              : `${(routeInfo.distance / 1000).toFixed(1)}km`}
+        <div className="absolute top-6 right-6 z-10 bg-white/80 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-md border border-border/30 bounce-enter">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">🚶</span>
+            <div className="text-lg font-semibold text-primary">
+              {routeInfo.distance < 1000 
+                ? `${Math.round(routeInfo.distance)}m` 
+                : `${(routeInfo.distance / 1000).toFixed(1)}km`}
+            </div>
           </div>
-          <div className="text-sm text-muted-foreground mt-1">
-            {Math.ceil(routeInfo.duration / 60)} min walk
+          <div className="text-sm text-muted-foreground">
+            About {Math.ceil(routeInfo.duration / 60)} min
           </div>
+          <p className="text-xs text-primary/70 italic mt-2">You've got this! 💚</p>
         </div>
       )}
+      
+      <BinSuccessModal open={showSuccessModal} onClose={handleCloseSuccessModal} />
     </div>
   );
 };
