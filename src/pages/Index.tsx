@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Map from '@/components/Map';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/logo.svg';
 
 const Index = () => {
   const [showMap, setShowMap] = useState(false);
@@ -10,10 +11,17 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-accent/10 flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
         <div className="space-y-6 fade-up-enter">
-          <h1 className="text-6xl md:text-7xl font-medium text-foreground tracking-tight" style={{ animationDelay: '0.1s' }}>
+          <div className="flex justify-center mb-8" style={{ animationDelay: '0s' }}>
+            <img 
+              src={logo} 
+              alt="bin there logo" 
+              className="h-32 md:h-40 w-auto"
+            />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-medium text-foreground tracking-tight" style={{ animationDelay: '0.1s' }}>
             bin there
           </h1>
           <p className="text-xl md:text-2xl font-normal text-foreground/80 leading-relaxed" style={{ animationDelay: '0.2s' }}>

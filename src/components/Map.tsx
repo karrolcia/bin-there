@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { celebrateBinning } from '@/utils/confetti';
 import { BinSuccessModal } from './BinSuccessModal';
 import { Compass, Heart } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYmludGhlcmUiLCJhIjoiY21neXhza3cwMDA0bzhtczdmM2sycmk1ZCJ9.ZkE0KmSlSAEJ14MSeCIh3w';
 
@@ -116,7 +117,7 @@ const Map = () => {
         });
 
         const userMarkerEl = document.createElement('div');
-        userMarkerEl.className = 'w-6 h-6 bg-accent rounded-full border-4 border-white shadow-lg';
+        userMarkerEl.className = 'w-6 h-6 bg-primary rounded-full border-4 border-white shadow-lg';
         userMarkerEl.style.animation = 'pulse-subtle 2s ease-in-out infinite';
         
         const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
@@ -287,9 +288,9 @@ const Map = () => {
         'line-cap': 'round',
       },
       paint: {
-        'line-color': '#5D9B8C',
+        'line-color': '#8B7355',
         'line-width': 5,
-        'line-opacity': 0.9,
+        'line-opacity': 0.85,
       },
     });
     
@@ -343,10 +344,16 @@ const Map = () => {
     <div className="relative w-full h-screen">
       <div ref={mapContainer} className="absolute inset-0" />
       
-      <div className="absolute top-6 left-6 z-10 bg-white/80 backdrop-blur-xl px-5 py-2.5 rounded-2xl shadow-md border border-border/30 flex items-center gap-2">
-        <span className="text-lg">🐾</span>
-        <span className="text-lg">🌱</span>
-        <h1 className="text-base font-medium text-foreground">bin there</h1>
+      <div className="absolute top-6 left-6 z-10 bg-card/90 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-lg border border-border/50 flex items-center gap-3">
+        <img 
+          src={logo} 
+          alt="bin there" 
+          className="h-8 w-auto"
+        />
+        <div className="flex flex-col">
+          <span className="font-medium text-lg text-foreground">bin there</span>
+          <span className="text-xs text-muted-foreground">🐾 Dog walker's companion</span>
+        </div>
       </div>
       
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
