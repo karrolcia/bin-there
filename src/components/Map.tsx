@@ -18,6 +18,8 @@ interface TrashCan {
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const isMountedRef = useRef(true);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [trashCans, setTrashCans] = useState<TrashCan[]>([]);
   const [isLoadingBins, setIsLoadingBins] = useState(false);
@@ -117,10 +119,12 @@ const Map = () => {
         userMarkerEl.className = 'w-6 h-6 bg-accent rounded-full border-4 border-white shadow-lg';
         userMarkerEl.style.animation = 'pulse-subtle 2s ease-in-out infinite';
         
-        new mapboxgl.Marker({ element: userMarkerEl })
+        const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
           .setLngLat(userCoords)
           .setPopup(new mapboxgl.Popup().setHTML('<p class="text-sm font-medium">You are here</p>'))
           .addTo(map.current);
+        
+        userMarkerRef.current = userMarker;
 
         await fetchNearbyTrashCans(userCoords[1], userCoords[0], 1000);
 
@@ -142,34 +146,83 @@ const Map = () => {
 
     // Cleanup
     return () => {
-      markersRef.current.forEach(marker => marker.remove());
+      isMountedRef.current = false;
+      
+      // Clean up user marker
+      if (userMarkerRef.current) {
+        try {
+          userMarkerRef.current.remove();
+        } catch (e) {
+          console.warn('Error removing user marker:', e);
+        }
+        userMarkerRef.current = null;
+      }
+      
+      // Clean up bin markers
+      markersRef.current.forEach(marker => {
+        try {
+          marker.remove();
+        } catch (e) {
+          console.warn('Error removing marker:', e);
+        }
+      });
       markersRef.current = [];
-      map.current?.remove();
+      
+      // Clean up map
+      if (map.current) {
+        try {
+          map.current.remove();
+          map.current = null;
+        } catch (e) {
+          console.warn('Error removing map:', e);
+        }
+      }
     };
   }, []);
 
   useEffect(() => {
     if (!map.current || trashCans.length === 0) return;
-
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-
-    trashCans.forEach((trash) => {
-      const binMarkerEl = document.createElement('div');
-      binMarkerEl.innerHTML = '♻️';
-      binMarkerEl.className = 'text-2xl bounce-enter';
-      binMarkerEl.style.filter = 'drop-shadow(0 2px 8px rgba(100, 130, 110, 0.3))';
+    
+    // Wait for map to be fully loaded
+    const addMarkers = () => {
+      if (!map.current || !isMountedRef.current) return;
       
-      const marker = new mapboxgl.Marker({ element: binMarkerEl })
-        .setLngLat(trash.coordinates)
-        .setPopup(
-          new mapboxgl.Popup().setHTML(
-            `<p class="text-sm font-medium">${trash.name}</p>`
+      markersRef.current.forEach(marker => {
+        try {
+          marker.remove();
+        } catch (e) {
+          console.warn('Error removing marker:', e);
+        }
+      });
+      markersRef.current = [];
+
+      trashCans.forEach((trash) => {
+        const binMarkerEl = document.createElement('div');
+        binMarkerEl.innerHTML = '♻️';
+        binMarkerEl.className = 'text-2xl bounce-enter';
+        binMarkerEl.style.filter = 'drop-shadow(0 2px 8px rgba(100, 130, 110, 0.3))';
+        
+        const marker = new mapboxgl.Marker({ element: binMarkerEl })
+          .setLngLat(trash.coordinates)
+          .setPopup(
+            new mapboxgl.Popup().setHTML(
+              `<p class="text-sm font-medium">${trash.name}</p>`
+            )
           )
-        )
-        .addTo(map.current!);
-      markersRef.current.push(marker);
-    });
+          .addTo(map.current!);
+        markersRef.current.push(marker);
+      });
+    };
+    
+    if (map.current.loaded()) {
+      addMarkers();
+    } else {
+      map.current.on('load', addMarkers);
+    }
+    
+    return () => {
+      map.current?.off('load', addMarkers);
+    };
   }, [trashCans]);
 
   const handleBinIt = async () => {
