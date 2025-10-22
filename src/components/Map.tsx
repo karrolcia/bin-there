@@ -19,12 +19,6 @@ const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
   };
 };
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-
-// Check if Mapbox token is configured
-if (!MAPBOX_TOKEN) {
-  console.error('VITE_MAPBOX_TOKEN is not configured. Please add it to your environment variables.');
-}
 
 interface TrashCan {
   id: number | string;
@@ -37,6 +31,7 @@ const Map = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const isMountedRef = useRef(true);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [trashCans, setTrashCans] = useState<TrashCan[]>([]);
   const [isLoadingBins, setIsLoadingBins] = useState(false);
@@ -49,6 +44,33 @@ const Map = () => {
   const [currentZoom, setCurrentZoom] = useState(16);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const fetchTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Fetch Mapbox token on mount
+  useEffect(() => {
+    const fetchMapboxToken = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        if (error) {
+          console.error('Error fetching Mapbox token:', error);
+          toast.error('Failed to load map configuration');
+          return;
+        }
+        
+        if (data?.token) {
+          setMapboxToken(data.token);
+        } else {
+          console.error('No token received from backend');
+          toast.error('Map configuration error');
+        }
+      } catch (error) {
+        console.error('Failed to fetch Mapbox token:', error);
+        toast.error('Failed to load map configuration');
+      }
+    };
+
+    fetchMapboxToken();
+  }, []);
 
   const getRadiusForZoom = (zoom: number): number => {
     if (zoom < 14) return 5000;
@@ -190,9 +212,14 @@ const Map = () => {
   };
 
   const getWalkingRoute = async (start: [number, number], end: [number, number]) => {
+    if (!mapboxToken) {
+      toast.error('Map not ready yet');
+      return null;
+    }
+    
     try {
       const coords = `${start[0]},${start[1]};${end[0]},${end[1]}`;
-      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${coords}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${coords}?geometries=geojson&access_token=${mapboxToken}`;
       
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch route');
@@ -216,15 +243,9 @@ const Map = () => {
   };
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || !mapboxToken) return;
 
-    // Runtime check for Mapbox token
-    if (!MAPBOX_TOKEN) {
-      toast.error('Map configuration error. Please contact support.');
-      return;
-    }
-
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    mapboxgl.accessToken = mapboxToken;
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -355,7 +376,7 @@ const Map = () => {
         }
       }
     };
-  }, []);
+  }, [mapboxToken]);
 
   useEffect(() => {
     if (!map.current || trashCans.length === 0) return;
