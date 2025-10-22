@@ -43,6 +43,68 @@ const Map = () => {
   const [nearestBin, setNearestBin] = useState<TrashCan | null>(null);
   const [currentZoom, setCurrentZoom] = useState(16);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+
+  // Helper functions to create SVG elements securely
+  const createUserMarkerSVG = (): SVGSVGElement => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('width', '20');
+    svg.setAttribute('height', '20');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'white');
+    svg.setAttribute('stroke-width', '2.5');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    
+    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    polygon.setAttribute('points', '3 11 22 2 13 21 11 13 3 11');
+    
+    svg.appendChild(polygon);
+    return svg;
+  };
+
+  const createBinMarkerSVG = (): SVGSVGElement => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('width', '18');
+    svg.setAttribute('height', '18');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'white');
+    svg.setAttribute('stroke-width', '2.5');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    
+    const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path1.setAttribute('d', 'M3 6h18');
+    
+    const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path2.setAttribute('d', 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6');
+    
+    const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path3.setAttribute('d', 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2');
+    
+    const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line1.setAttribute('x1', '10');
+    line1.setAttribute('x2', '10');
+    line1.setAttribute('y1', '11');
+    line1.setAttribute('y2', '17');
+    
+    const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line2.setAttribute('x1', '14');
+    line2.setAttribute('x2', '14');
+    line2.setAttribute('y1', '11');
+    line2.setAttribute('y2', '17');
+    
+    svg.appendChild(path1);
+    svg.appendChild(path2);
+    svg.appendChild(path3);
+    svg.appendChild(line1);
+    svg.appendChild(line2);
+    
+    return svg;
+  };
   const fetchTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Fetch Mapbox token on mount
@@ -268,15 +330,12 @@ const Map = () => {
 
         const userMarkerEl = document.createElement('div');
         userMarkerEl.className = 'w-10 h-10 bg-accent rounded-full flex items-center justify-center border-3 border-gray-800 shadow-xl';
-        userMarkerEl.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
-          </svg>
-        `;
+        const userSvg = createUserMarkerSVG();
+        userMarkerEl.appendChild(userSvg);
         
         const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
           .setLngLat(userCoords)
-          .setPopup(new mapboxgl.Popup().setHTML('<p class="text-sm font-medium">You are here</p>'))
+          .setPopup(new mapboxgl.Popup().setText('You are here'))
           .addTo(map.current);
         
         userMarkerRef.current = userMarker;
@@ -420,23 +479,12 @@ const Map = () => {
           transition: opacity 0.3s ease-in-out;
         `;
         
-        binMarkerEl.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 6h18"/>
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-            <line x1="10" x2="10" y1="11" y2="17"/>
-            <line x1="14" x2="14" y1="11" y2="17"/>
-          </svg>
-        `;
+        const binSvg = createBinMarkerSVG();
+        binMarkerEl.appendChild(binSvg);
         
         const marker = new mapboxgl.Marker({ element: binMarkerEl })
           .setLngLat(trash.coordinates)
-          .setPopup(
-            new mapboxgl.Popup().setHTML(
-              `<p class="text-sm font-medium">${trash.name}</p>`
-            )
-          )
+          .setPopup(new mapboxgl.Popup().setText(trash.name))
           .addTo(map.current!);
         
         // Fade in with stagger
