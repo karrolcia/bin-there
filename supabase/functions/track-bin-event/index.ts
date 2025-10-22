@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { checkRateLimit, createRateLimitResponse } from '../_shared/rateLimiter.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,6 +23,21 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting: 20 requests per minute per IP
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    const rateLimitResult = await checkRateLimit(ipAddress, 'track-bin-event', {
+      maxRequests: 20,
+      windowSeconds: 60,
+    });
+
+    if (!rateLimitResult.allowed) {
+      console.log('Rate limit exceeded for IP:', ipAddress);
+      return createRateLimitResponse(rateLimitResult, corsHeaders);
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
