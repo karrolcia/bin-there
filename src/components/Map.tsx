@@ -674,7 +674,7 @@ const Map = () => {
         </p>
       </div>
       
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
+      <div className="absolute bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
         {!showBinnedButton ? (
           <div className="flex flex-col items-center gap-2">
             <Button
