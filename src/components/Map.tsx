@@ -237,16 +237,12 @@ const Map = () => {
         binsToShow = binsWithDistance
           .sort((a, b) => a.distance - b.distance)
           .slice(0, 50);
-        
-        toast.info(`Showing 50 nearest bins (${bins.length} total in area)`);
       }
       
       setTrashCans(binsToShow);
       
       if (bins.length === 0) {
         toast.info("No bins here just yet — keep walking!");
-      } else {
-        toast.success(`${bins.length} bins nearby`);
       }
     } catch (error) {
       console.error('Error fetching trash cans:', error);
@@ -671,6 +667,13 @@ const Map = () => {
         <img src={logo} alt="bin there" className="h-10 w-auto" />
       </div>
       
+      <div className="absolute top-6 right-6 z-10 bg-card/90 backdrop-blur-xl px-4 py-3 rounded-full shadow-lg border border-border/50">
+        <p className="text-sm font-medium text-foreground flex items-center gap-2">
+          <Trash2 className="w-4 h-4 text-primary" />
+          <span>{trashCans.length} bins nearby</span>
+        </p>
+      </div>
+      
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
         {!showBinnedButton ? (
           <div className="flex flex-col items-center gap-2">
@@ -703,7 +706,7 @@ const Map = () => {
       </div>
       
       {routeInfo && (
-        <div className="absolute top-6 right-6 z-10 bg-card/90 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-lg border border-border/50 bounce-enter">
+        <div className="absolute top-20 left-6 z-10 bg-card/90 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-lg border border-border/50 bounce-enter">
           <div className="flex items-center gap-2 mb-2">
             <div className="text-lg font-semibold text-foreground">
               {routeInfo.distance < 1000 
