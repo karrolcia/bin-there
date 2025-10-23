@@ -478,6 +478,66 @@ const Map = () => {
         const binSvg = createBinMarkerSVG();
         binMarkerEl.appendChild(binSvg);
         
+        // Add click handler to bin marker
+        binMarkerEl.addEventListener('click', async () => {
+          if (!userLocation) {
+            toast.info('Finding you…');
+            return;
+          }
+          
+          setNearestBin(trash);
+          
+          const route = await getWalkingRoute(userLocation, trash.coordinates);
+          
+          if (!route) return;
+          
+          if (map.current?.getSource('route')) {
+            map.current.removeLayer('route');
+            map.current.removeSource('route');
+          }
+          
+          map.current?.addSource('route', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: route.geometry,
+            },
+          });
+          
+          map.current?.addLayer({
+            id: 'route',
+            type: 'line',
+            source: 'route',
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round',
+            },
+            paint: {
+              'line-color': '#4A7C6F',
+              'line-width': 5,
+              'line-opacity': 0.9,
+            },
+          });
+          
+          const coordinates = route.geometry.coordinates;
+          const bounds = coordinates.reduce((bounds: any, coord: any) => {
+            return bounds.extend(coord);
+          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+          
+          map.current?.fitBounds(bounds, {
+            padding: 80,
+            duration: 1000,
+          });
+          
+          setRouteInfo({ distance: route.distance, duration: route.duration });
+          setShowBinnedButton(true);
+          
+          trackRouteCalculated(route.distance, route.duration);
+          
+          toast.success(`Route to ${trash.name} ready!`);
+        });
+        
         const marker = new mapboxgl.Marker({ element: binMarkerEl })
           .setLngLat(trash.coordinates)
           .setPopup(new mapboxgl.Popup().setText(trash.name))
@@ -631,6 +691,9 @@ const Map = () => {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    setNearestBin(null);
+    setRouteInfo(null);
+    setShowBinnedButton(false);
     
     if (userLocation) {
       map.current?.flyTo({
