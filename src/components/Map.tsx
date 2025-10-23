@@ -42,7 +42,6 @@ const Map = () => {
   const [userStats, setUserStats] = useState<{totalBins: number, streakDays: number} | null>(null);
   const [nearestBin, setNearestBin] = useState<TrashCan | null>(null);
   const [currentZoom, setCurrentZoom] = useState(16);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   // Helper functions to create SVG elements securely
   const createUserMarkerSVG = (): SVGSVGElement => {
@@ -300,6 +299,69 @@ const Map = () => {
     }
   };
 
+  // Consolidated function to select a bin and calculate route
+  const selectBin = useCallback(async (bin: TrashCan) => {
+    if (!userLocation) {
+      toast.info('Finding you…');
+      return;
+    }
+
+    setNearestBin(bin);
+    
+    const route = await getWalkingRoute(userLocation, bin.coordinates);
+    
+    if (!route) return;
+    
+    // Remove existing route if present
+    if (map.current?.getSource('route')) {
+      map.current.removeLayer('route');
+      map.current.removeSource('route');
+    }
+    
+    // Add new route to map
+    map.current?.addSource('route', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: route.geometry,
+      },
+    });
+    
+    map.current?.addLayer({
+      id: 'route',
+      type: 'line',
+      source: 'route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
+      paint: {
+        'line-color': '#4A7C6F',
+        'line-width': 5,
+        'line-opacity': 0.9,
+      },
+    });
+    
+    // Fit map to route bounds
+    const coordinates = route.geometry.coordinates;
+    const bounds = coordinates.reduce((bounds: any, coord: any) => {
+      return bounds.extend(coord);
+    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    
+    map.current?.fitBounds(bounds, {
+      padding: 80,
+      duration: 1000,
+    });
+    
+    setRouteInfo({ distance: route.distance, duration: route.duration });
+    setShowBinnedButton(true);
+    
+    trackRouteCalculated(route.distance, route.duration);
+    
+    toast.success(`Route to ${bin.name} ready!`);
+  }, [userLocation, mapboxToken]);
+
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken) return;
 
@@ -411,17 +473,7 @@ const Map = () => {
         userMarkerRef.current = null;
       }
       
-      // Clean up bin markers
-      markersRef.current.forEach(marker => {
-        try {
-          marker.remove();
-        } catch (e) {
-          console.warn('Error removing marker:', e);
-        }
-      });
-      markersRef.current = [];
-      
-      // Clean up map
+      // Clean up map (layers and sources are automatically cleaned up)
       if (map.current) {
         try {
           map.current.remove();
@@ -437,131 +489,215 @@ const Map = () => {
     if (!map.current || trashCans.length === 0) return;
     
     // Wait for map to be fully loaded
-    const addMarkers = () => {
+    const addClusteredMarkers = () => {
       if (!map.current || !isMountedRef.current) return;
       
-      markersRef.current.forEach(marker => {
-        try {
-          marker.remove();
-        } catch (e) {
-          console.warn('Error removing marker:', e);
-        }
-      });
-      markersRef.current = [];
+      // Remove existing bins source and layers if they exist
+      if (map.current.getSource('bins')) {
+        if (map.current.getLayer('clusters')) map.current.removeLayer('clusters');
+        if (map.current.getLayer('cluster-count')) map.current.removeLayer('cluster-count');
+        if (map.current.getLayer('unclustered-point')) map.current.removeLayer('unclustered-point');
+        map.current.removeSource('bins');
+      }
 
       // Get computed primary color from CSS variables
       const primaryColor = getComputedStyle(document.documentElement)
         .getPropertyValue('--primary')
         .trim();
-      const primaryColorHSL = `hsl(${primaryColor})`;
 
-      trashCans.forEach((trash, index) => {
-        const binMarkerEl = document.createElement('div');
-        
-        // Use inline styles for proper rendering
-        binMarkerEl.style.cssText = `
-          width: 36px;
-          height: 36px;
-          background-color: ${primaryColorHSL};
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-          border: 3px solid rgb(31, 41, 55);
-          cursor: pointer;
-          z-index: 1;
-          opacity: 0;
-          transition: opacity 0.3s ease-in-out;
+      // Create GeoJSON source with clustering
+      map.current.addSource('bins', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: trashCans.map(bin => ({
+            type: 'Feature',
+            properties: {
+              id: bin.id,
+              name: bin.name,
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: bin.coordinates,
+            },
+          })),
+        },
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50,
+      });
+
+      // Add cluster circles layer
+      map.current.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'bins',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            `hsl(${primaryColor})`,
+            10,
+            '#3b82f6',
+            50,
+            '#8b5cf6'
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            10,
+            25,
+            50,
+            30
+          ],
+          'circle-stroke-width': 3,
+          'circle-stroke-color': 'rgb(31, 41, 55)',
+        },
+      });
+
+      // Add cluster count labels
+      map.current.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'bins',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12,
+        },
+        paint: {
+          'text-color': '#ffffff',
+        },
+      });
+
+      // Add unclustered points (individual bins)
+      map.current.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'bins',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': `hsl(${primaryColor})`,
+          'circle-radius': 18,
+          'circle-stroke-width': 3,
+          'circle-stroke-color': 'rgb(31, 41, 55)',
+        },
+      });
+
+      // Add bin icon to unclustered points
+      if (!map.current.hasImage('bin-icon')) {
+        const binSvg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            <line x1="10" x2="10" y1="11" y2="17"/>
+            <line x1="14" x2="14" y1="11" y2="17"/>
+          </svg>
         `;
-        
-        const binSvg = createBinMarkerSVG();
-        binMarkerEl.appendChild(binSvg);
-        
-        // Add click handler to bin marker
-        binMarkerEl.addEventListener('click', async () => {
-          if (!userLocation) {
-            toast.info('Finding you…');
-            return;
+        const img = new Image(24, 24);
+        img.onload = () => {
+          if (map.current && !map.current.hasImage('bin-icon')) {
+            map.current.addImage('bin-icon', img);
+            
+            // Add symbol layer for bin icon
+            if (!map.current.getLayer('unclustered-icon')) {
+              map.current.addLayer({
+                id: 'unclustered-icon',
+                type: 'symbol',
+                source: 'bins',
+                filter: ['!', ['has', 'point_count']],
+                layout: {
+                  'icon-image': 'bin-icon',
+                  'icon-size': 0.5,
+                  'icon-allow-overlap': true,
+                },
+              });
+            }
           }
-          
-          setNearestBin(trash);
-          
-          const route = await getWalkingRoute(userLocation, trash.coordinates);
-          
-          if (!route) return;
-          
-          if (map.current?.getSource('route')) {
-            map.current.removeLayer('route');
-            map.current.removeSource('route');
-          }
-          
-          map.current?.addSource('route', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: route.geometry,
-            },
-          });
-          
-          map.current?.addLayer({
-            id: 'route',
-            type: 'line',
-            source: 'route',
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(binSvg);
+      } else {
+        // Icon already exists, just add the layer
+        if (!map.current.getLayer('unclustered-icon')) {
+          map.current.addLayer({
+            id: 'unclustered-icon',
+            type: 'symbol',
+            source: 'bins',
+            filter: ['!', ['has', 'point_count']],
             layout: {
-              'line-join': 'round',
-              'line-cap': 'round',
-            },
-            paint: {
-              'line-color': '#4A7C6F',
-              'line-width': 5,
-              'line-opacity': 0.9,
+              'icon-image': 'bin-icon',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
             },
           });
-          
-          const coordinates = route.geometry.coordinates;
-          const bounds = coordinates.reduce((bounds: any, coord: any) => {
-            return bounds.extend(coord);
-          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-          
-          map.current?.fitBounds(bounds, {
-            padding: 80,
-            duration: 1000,
-          });
-          
-          setRouteInfo({ distance: route.distance, duration: route.duration });
-          setShowBinnedButton(true);
-          
-          trackRouteCalculated(route.distance, route.duration);
-          
-          toast.success(`Route to ${trash.name} ready!`);
+        }
+      }
+
+      // Click handler for clusters - zoom in
+      map.current.on('click', 'clusters', (e) => {
+        if (!map.current) return;
+        const features = map.current.queryRenderedFeatures(e.point, {
+          layers: ['clusters'],
         });
+        const clusterId = features[0].properties.cluster_id;
+        const source = map.current.getSource('bins') as mapboxgl.GeoJSONSource;
         
-        const marker = new mapboxgl.Marker({ element: binMarkerEl })
-          .setLngLat(trash.coordinates)
-          .setPopup(new mapboxgl.Popup().setText(trash.name))
-          .addTo(map.current!);
+        source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+          if (err || !map.current) return;
+          
+          map.current.easeTo({
+            center: (features[0].geometry as any).coordinates,
+            zoom: zoom,
+            duration: 500,
+          });
+        });
+      });
+
+      // Click handler for unclustered points - select bin
+      map.current.on('click', 'unclustered-point', (e) => {
+        if (!map.current || !e.features || e.features.length === 0) return;
         
-        // Fade in with stagger
-        setTimeout(() => {
-          binMarkerEl.style.opacity = '1';
-        }, 50 + (index * 30));
+        const feature = e.features[0];
+        const binId = feature.properties?.id;
+        const bin = trashCans.find(b => b.id.toString() === binId?.toString());
         
-        markersRef.current.push(marker);
+        if (bin) {
+          selectBin(bin);
+        }
+      });
+
+      // Change cursor on hover
+      map.current.on('mouseenter', 'clusters', () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+      map.current.on('mouseleave', 'clusters', () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
+      });
+      map.current.on('mouseenter', 'unclustered-point', () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+      map.current.on('mouseleave', 'unclustered-point', () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
       });
     };
     
     if (map.current.loaded()) {
-      addMarkers();
+      addClusteredMarkers();
     } else {
-      map.current.on('load', addMarkers);
+      map.current.on('load', addClusteredMarkers);
     }
     
     return () => {
-      map.current?.off('load', addMarkers);
+      if (map.current) {
+        map.current.off('load', addClusteredMarkers);
+        // Note: Layer-specific event handlers are automatically removed when layers are removed
+      }
     };
-  }, [trashCans]);
+  }, [trashCans, selectBin]);
 
   const handleBinIt = async () => {
     if (!userLocation) {
@@ -583,63 +719,7 @@ const Map = () => {
       prev.distance < current.distance ? prev : current
     );
     
-    setNearestBin(nearest);
-    
-    const route = await getWalkingRoute(userLocation, nearest.coordinates);
-    
-    if (!route) return;
-    
-    if (map.current?.getSource('route')) {
-      map.current.removeLayer('route');
-      map.current.removeSource('route');
-    }
-    
-    map.current?.addSource('route', {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: route.geometry,
-      },
-    });
-    
-    map.current?.addLayer({
-      id: 'route',
-      type: 'line',
-      source: 'route',
-      layout: {
-        'line-join': 'round',
-        'line-cap': 'round',
-      },
-      paint: {
-        'line-color': '#4A7C6F',
-        'line-width': 5,
-        'line-opacity': 0.9,
-      },
-    });
-    
-    const coordinates = route.geometry.coordinates;
-    const bounds = coordinates.reduce((bounds: any, coord: any) => {
-      return bounds.extend(coord);
-    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-    
-    map.current?.fitBounds(bounds, {
-      padding: 80,
-      duration: 1000,
-    });
-    
-    const distanceText = route.distance < 1000 
-      ? `${Math.round(route.distance)}m` 
-      : `${(route.distance / 1000).toFixed(1)}km`;
-    const durationText = `${Math.ceil(route.duration / 60)} min`;
-    
-    setRouteInfo({ distance: route.distance, duration: route.duration });
-    setShowBinnedButton(true);
-    
-    // Track route calculated
-    trackRouteCalculated(route.distance, route.duration);
-    
-    toast.success(`There you go. Bin it with pride!`);
+    await selectBin(nearest);
   };
 
   const handleBinnedIt = async () => {
@@ -678,15 +758,13 @@ const Map = () => {
       console.error('Failed to track bin event:', error);
     }
     
-    setShowSuccessModal(true);
-    
+    // Remove route from map
     if (map.current?.getSource('route')) {
       map.current.removeLayer('route');
       map.current.removeSource('route');
     }
     
-    setRouteInfo(null);
-    setShowBinnedButton(false);
+    setShowSuccessModal(true);
   };
 
   const handleCloseSuccessModal = () => {
