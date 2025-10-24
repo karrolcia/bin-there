@@ -19,6 +19,24 @@ const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
   };
 };
 
+// Resolve CSS HSL variable to RGB for Mapbox compatibility
+const resolveCssHslVarToRgb = (varName: string, fallback: string = '#22c55e'): string => {
+  try {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    if (!raw) return fallback;
+    
+    // Create a temp element to let the browser resolve the color
+    const el = document.createElement('span');
+    el.style.color = `hsl(${raw})`;
+    document.body.appendChild(el);
+    const resolved = getComputedStyle(el).color; // Returns "rgb(r, g, b)"
+    document.body.removeChild(el);
+    return resolved || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 
 interface TrashCan {
   id: number | string;
@@ -520,10 +538,8 @@ const Map = () => {
         map.current.removeSource('bins');
       }
 
-      // Get computed primary color from CSS variables
-      const primaryColor = getComputedStyle(document.documentElement)
-        .getPropertyValue('--primary')
-        .trim();
+      // Get computed primary color from CSS variables (converted to RGB for Mapbox)
+      const primaryColor = resolveCssHslVarToRgb('--primary', '#22c55e');
 
       // Create GeoJSON source with clustering
       map.current.addSource('bins', {
@@ -557,7 +573,7 @@ const Map = () => {
           'circle-color': [
             'step',
             ['get', 'point_count'],
-            `hsl(${primaryColor})`,
+            primaryColor,
             10,
             '#3b82f6',
             50,
@@ -600,7 +616,7 @@ const Map = () => {
         source: 'bins',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': `hsl(${primaryColor})`,
+          'circle-color': primaryColor,
           'circle-radius': 18,
           'circle-stroke-width': 3,
           'circle-stroke-color': 'rgb(31, 41, 55)',
