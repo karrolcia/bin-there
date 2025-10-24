@@ -46,6 +46,7 @@ const Map = () => {
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   const clusterClickHandlerRef = useRef<((e: any) => void) | null>(null);
   const pointClickHandlerRef = useRef<((e: any) => void) | null>(null);
+  const hasActiveRouteRef = useRef(false);
 
   // Helper functions to create SVG elements securely
   const createUserMarkerSVG = (): SVGSVGElement => {
@@ -364,6 +365,7 @@ const Map = () => {
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
     setHasActiveRoute(true);
+    hasActiveRouteRef.current = true;
     
     trackRouteCalculated(route.distance, route.duration);
     
@@ -422,30 +424,39 @@ const Map = () => {
         }
 
         // Add event listeners for dynamic bin loading
-        map.current.on('moveend', () => {
-          if (!map.current || hasActiveRoute) return;
+        map.current.on('moveend', (e: any) => {
+          if (!map.current) return;
+          // Skip refetching while a route is active or during programmatic movements/route calc
+          if (hasActiveRouteRef.current) return;
+          if (!e?.originalEvent) return; // ignore fitBounds/flyTo easing
+          if (isCalculatingRoute) return;
+
           const center = map.current.getCenter();
           const zoom = map.current.getZoom();
           setCurrentZoom(zoom);
           const radius = getRadiusForZoom(zoom);
-          
+
           clearTimeout(fetchTimeoutRef.current);
           fetchTimeoutRef.current = setTimeout(() => {
             fetchNearbyTrashCans(center.lat, center.lng, radius);
-          }, 500);
+          }, 600);
         });
 
-        map.current.on('zoomend', () => {
-          if (!map.current || hasActiveRoute) return;
+        map.current.on('zoomend', (e: any) => {
+          if (!map.current) return;
+          if (hasActiveRouteRef.current) return;
+          if (!e?.originalEvent) return;
+          if (isCalculatingRoute) return;
+
           const center = map.current.getCenter();
           const zoom = map.current.getZoom();
           setCurrentZoom(zoom);
           const radius = getRadiusForZoom(zoom);
-          
+
           clearTimeout(fetchTimeoutRef.current);
           fetchTimeoutRef.current = setTimeout(() => {
             fetchNearbyTrashCans(center.lat, center.lng, radius);
-          }, 500);
+          }, 600);
         });
       },
       (error) => {
@@ -505,6 +516,7 @@ const Map = () => {
         if (map.current.getLayer('clusters')) map.current.removeLayer('clusters');
         if (map.current.getLayer('cluster-count')) map.current.removeLayer('cluster-count');
         if (map.current.getLayer('unclustered-point')) map.current.removeLayer('unclustered-point');
+        if (map.current.getLayer('unclustered-icon')) map.current.removeLayer('unclustered-icon');
         map.current.removeSource('bins');
       }
 
@@ -797,6 +809,7 @@ const Map = () => {
     setRouteInfo(null);
     setShowBinnedButton(false);
     setHasActiveRoute(false);
+    hasActiveRouteRef.current = false;
     
     if (userLocation) {
       map.current?.flyTo({
@@ -816,6 +829,7 @@ const Map = () => {
     setShowBinnedButton(false);
     setNearestBin(null);
     setHasActiveRoute(false);
+    hasActiveRouteRef.current = false;
     toast.info('Route cancelled');
   };
 
@@ -835,7 +849,7 @@ const Map = () => {
       {isLoadingBins && !isMapLoading && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg border border-border/50 z-10">
           <p className="text-sm text-muted-foreground flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+            <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></span>
             Finding bins nearby...
           </p>
         </div>
