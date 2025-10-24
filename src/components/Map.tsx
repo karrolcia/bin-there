@@ -608,6 +608,22 @@ const Map = () => {
       });
 
       // Add bin icon to unclustered points
+      const addIconLayer = () => {
+        if (!map.current || map.current.getLayer('unclustered-icon')) return;
+        
+        map.current.addLayer({
+          id: 'unclustered-icon',
+          type: 'symbol',
+          source: 'bins',
+          filter: ['!', ['has', 'point_count']],
+          layout: {
+            'icon-image': 'bin-icon',
+            'icon-size': 0.5,
+            'icon-allow-overlap': true,
+          },
+        });
+      };
+
       if (!map.current.hasImage('bin-icon')) {
         const binSvg = `
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -620,41 +636,18 @@ const Map = () => {
         `;
         const img = new Image(24, 24);
         img.onload = () => {
-          if (map.current && !map.current.hasImage('bin-icon')) {
+          if (map.current && isMountedRef.current && !map.current.hasImage('bin-icon')) {
             map.current.addImage('bin-icon', img);
-            
-            // Add symbol layer for bin icon
-            if (!map.current.getLayer('unclustered-icon')) {
-              map.current.addLayer({
-                id: 'unclustered-icon',
-                type: 'symbol',
-                source: 'bins',
-                filter: ['!', ['has', 'point_count']],
-                layout: {
-                  'icon-image': 'bin-icon',
-                  'icon-size': 0.5,
-                  'icon-allow-overlap': true,
-                },
-              });
-            }
+            addIconLayer();
           }
+        };
+        img.onerror = () => {
+          console.error('Failed to load bin icon');
         };
         img.src = 'data:image/svg+xml;base64,' + btoa(binSvg);
       } else {
         // Icon already exists, just add the layer
-        if (!map.current.getLayer('unclustered-icon')) {
-          map.current.addLayer({
-            id: 'unclustered-icon',
-            type: 'symbol',
-            source: 'bins',
-            filter: ['!', ['has', 'point_count']],
-            layout: {
-              'icon-image': 'bin-icon',
-              'icon-size': 0.5,
-              'icon-allow-overlap': true,
-            },
-          });
-        }
+        addIconLayer();
       }
 
       // Remove old handlers if they exist
@@ -691,10 +684,18 @@ const Map = () => {
         
         const feature = e.features[0];
         const binId = feature.properties?.id;
-        const bin = trashCans.find(b => b.id.toString() === binId?.toString());
+        
+        if (!binId) {
+          console.warn('Clicked bin has no ID');
+          return;
+        }
+        
+        const bin = trashCans.find(b => b.id.toString() === binId.toString());
         
         if (bin) {
           selectBin(bin);
+        } else {
+          console.warn('Clicked bin not found in trashCans array:', binId);
         }
       };
 
@@ -730,10 +731,17 @@ const Map = () => {
     return () => {
       if (map.current) {
         map.current.off('load', addClusteredMarkers);
-        // Note: Layer-specific event handlers are automatically removed when layers are removed
+        
+        // Explicitly remove click handlers
+        if (clusterClickHandlerRef.current) {
+          map.current.off('click', 'clusters', clusterClickHandlerRef.current);
+        }
+        if (pointClickHandlerRef.current) {
+          map.current.off('click', 'unclustered-point', pointClickHandlerRef.current);
+        }
       }
     };
-  }, [trashCans, selectBin]);
+  }, [trashCans]);
 
   const handleBinIt = async () => {
     if (!userLocation) {
