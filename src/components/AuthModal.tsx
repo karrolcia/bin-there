@@ -9,10 +9,19 @@ import { z } from 'zod';
 import { trackAuthEvent } from '@/utils/activityTracker';
 import logo from '@/assets/logo.svg';
 
-// Validation schema
+// Validation schema with strong password requirements
 const authSchema = z.object({
-  email: z.string().email('Invalid email address').trim().max(255, 'Email too long'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(72, 'Password too long'),
+  email: z.string()
+    .trim()
+    .toLowerCase()
+    .email('Invalid email address')
+    .max(255, 'Email too long'),
+  password: z.string()
+    .min(10, 'Password must be at least 10 characters')
+    .max(72, 'Password too long')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
 });
 
 interface AuthModalProps {
@@ -87,10 +96,20 @@ export const AuthModal = ({ open, onClose, onSuccess }: AuthModalProps) => {
       onSuccess();
       onClose();
     } catch (error: any) {
+      // Log specific error for debugging but show generic message to user
+      console.error(isSignUp ? 'Sign up error:' : 'Sign in error:', error.message, error.code);
+      
+      // Generic error messages to prevent account enumeration
+      let clientMessage = 'Invalid email or password. Please check your credentials and try again.';
+      
+      if (isSignUp) {
+        clientMessage = 'Unable to create account. Please try again or contact support if the problem persists.';
+      }
+      
       toast({
         variant: "destructive",
         title: isSignUp ? "Sign up failed" : "Sign in failed",
-        description: error.message,
+        description: clientMessage,
       });
     } finally {
       setLoading(false);
@@ -139,7 +158,9 @@ export const AuthModal = ({ open, onClose, onSuccess }: AuthModalProps) => {
                 disabled={loading}
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground">At least 8 characters</p>
+              <p className="text-xs text-muted-foreground">
+                At least 10 characters with uppercase, number, and special character
+              </p>
             </div>
 
             <Button

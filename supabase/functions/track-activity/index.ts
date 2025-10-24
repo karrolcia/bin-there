@@ -7,6 +7,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Metadata validation schema with explicit allowed fields and size limits
+const metadataSchema = z.object({
+  searchQuery: z.string().max(200).optional(),
+  errorMessage: z.string().max(500).optional(),
+  duration: z.number().min(0).max(3600000).optional(), // Max 1 hour in milliseconds
+  binId: z.string().uuid().optional(),
+  distance: z.number().min(0).max(100000).optional(), // Max 100km in meters
+  routeDistance: z.number().min(0).max(100000).optional(),
+  routeDuration: z.number().min(0).max(7200000).optional(), // Max 2 hours
+  provider: z.string().max(50).optional(),
+  deviceType: z.string().max(50).optional(),
+}).strict(); // Reject any unknown fields
+
 // Input validation schema
 const activitySchema = z.object({
   activityType: z.enum([
@@ -23,8 +36,10 @@ const activitySchema = z.object({
   ]),
   locationLat: z.number().min(-90).max(90).optional(),
   locationLng: z.number().min(-180).max(180).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: metadataSchema.optional(),
 });
+
+const MAX_METADATA_SIZE = 5000; // 5KB limit
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -82,6 +97,18 @@ Deno.serve(async (req) => {
     }
 
     const { activityType, locationLat, locationLng, metadata } = result.data;
+
+    // Additional size check for metadata
+    if (metadata) {
+      const metadataString = JSON.stringify(metadata);
+      if (metadataString.length > MAX_METADATA_SIZE) {
+        console.error('Metadata size limit exceeded:', metadataString.length);
+        return new Response(
+          JSON.stringify({ error: 'Metadata too large (max 5KB)' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // Get user agent for additional context
     const userAgent = req.headers.get('user-agent') || null;
