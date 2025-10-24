@@ -119,7 +119,7 @@ const Privacy = () => {
               <li>Withdraw consent at any time</li>
             </ul>
             <p className="mt-4">
-              To exercise these rights, please contact us at [YOUR-EMAIL@DOMAIN.COM]
+              To exercise these rights, please contact us at info@binthere.online
             </p>
           </section>
 
@@ -150,16 +150,10 @@ const Privacy = () => {
               If you have questions about this privacy policy or our data practices, please contact us at:
             </p>
             <p className="font-medium">
-              Email: [YOUR-EMAIL@DOMAIN.COM]<br />
-              Address: [YOUR-ADDRESS]
+              Email: info@binthere.online
             </p>
           </section>
 
-          <div className="mt-12 p-6 bg-secondary/20 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">
-              <strong>⚠️ Important:</strong> This privacy policy is a template. You should customize it with your specific contact information and have it reviewed by a legal professional before going live.
-            </p>
-          </div>
         </div>
       </div>
     </div>
