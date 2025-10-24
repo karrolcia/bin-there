@@ -159,7 +159,7 @@ const Terms = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4 text-foreground">Governing Law</h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of [YOUR-JURISDICTION], without regard to its conflict of law provisions. Any disputes arising from these Terms or the Service shall be resolved in the courts of [YOUR-JURISDICTION].
+              These Terms shall be governed by and construed in accordance with applicable international laws and the laws of your jurisdiction, without regard to its conflict of law provisions.
             </p>
           </section>
 
@@ -169,16 +169,9 @@ const Terms = () => {
               If you have any questions about these Terms, please contact us at:
             </p>
             <p className="font-medium">
-              Email: [YOUR-EMAIL@DOMAIN.COM]<br />
-              Address: [YOUR-ADDRESS]
+              Email: info@binthere.online
             </p>
           </section>
-
-          <div className="mt-12 p-6 bg-secondary/20 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">
-              <strong>⚠️ Important:</strong> These terms of service are a template. You should customize them with your specific information (jurisdiction, contact details, etc.) and have them reviewed by a legal professional before going live.
-            </p>
-          </div>
         </div>
       </div>
     </div>

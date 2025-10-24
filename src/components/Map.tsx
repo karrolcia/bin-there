@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { celebrateBinning } from '@/utils/confetti';
 import { BinSuccessModal } from './BinSuccessModal';
-import { Compass, Heart, Trash2 } from 'lucide-react';
+import { Compass, Heart, Trash2, Navigation, X } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { supabase } from '@/integrations/supabase/client';
 import { trackAppOpened, trackBinSearched, trackBinMarked, trackRouteCalculated, trackLocationEvent } from '@/utils/activityTracker';
@@ -42,6 +42,10 @@ const Map = () => {
   const [userStats, setUserStats] = useState<{totalBins: number, streakDays: number} | null>(null);
   const [nearestBin, setNearestBin] = useState<TrashCan | null>(null);
   const [currentZoom, setCurrentZoom] = useState(16);
+  const [hasActiveRoute, setHasActiveRoute] = useState(false);
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+  const clusterClickHandlerRef = useRef<((e: any) => void) | null>(null);
+  const pointClickHandlerRef = useRef<((e: any) => void) | null>(null);
 
   // Helper functions to create SVG elements securely
   const createUserMarkerSVG = (): SVGSVGElement => {
@@ -307,8 +311,11 @@ const Map = () => {
     }
 
     setNearestBin(bin);
+    setIsCalculatingRoute(true);
     
     const route = await getWalkingRoute(userLocation, bin.coordinates);
+    
+    setIsCalculatingRoute(false);
     
     if (!route) return;
     
@@ -356,6 +363,7 @@ const Map = () => {
     
     setRouteInfo({ distance: route.distance, duration: route.duration });
     setShowBinnedButton(true);
+    setHasActiveRoute(true);
     
     trackRouteCalculated(route.distance, route.duration);
     
@@ -415,7 +423,7 @@ const Map = () => {
 
         // Add event listeners for dynamic bin loading
         map.current.on('moveend', () => {
-          if (!map.current) return;
+          if (!map.current || hasActiveRoute) return;
           const center = map.current.getCenter();
           const zoom = map.current.getZoom();
           setCurrentZoom(zoom);
@@ -428,7 +436,7 @@ const Map = () => {
         });
 
         map.current.on('zoomend', () => {
-          if (!map.current) return;
+          if (!map.current || hasActiveRoute) return;
           const center = map.current.getCenter();
           const zoom = map.current.getZoom();
           setCurrentZoom(zoom);
@@ -637,8 +645,16 @@ const Map = () => {
         }
       }
 
+      // Remove old handlers if they exist
+      if (clusterClickHandlerRef.current) {
+        map.current.off('click', 'clusters', clusterClickHandlerRef.current);
+      }
+      if (pointClickHandlerRef.current) {
+        map.current.off('click', 'unclustered-point', pointClickHandlerRef.current);
+      }
+
       // Click handler for clusters - zoom in
-      map.current.on('click', 'clusters', (e) => {
+      const clusterClickHandler = (e: any) => {
         if (!map.current) return;
         const features = map.current.queryRenderedFeatures(e.point, {
           layers: ['clusters'],
@@ -655,10 +671,10 @@ const Map = () => {
             duration: 500,
           });
         });
-      });
+      };
 
       // Click handler for unclustered points - select bin
-      map.current.on('click', 'unclustered-point', (e) => {
+      const pointClickHandler = (e: any) => {
         if (!map.current || !e.features || e.features.length === 0) return;
         
         const feature = e.features[0];
@@ -668,7 +684,15 @@ const Map = () => {
         if (bin) {
           selectBin(bin);
         }
-      });
+      };
+
+      // Store references
+      clusterClickHandlerRef.current = clusterClickHandler;
+      pointClickHandlerRef.current = pointClickHandler;
+
+      // Add handlers
+      map.current.on('click', 'clusters', clusterClickHandler);
+      map.current.on('click', 'unclustered-point', pointClickHandler);
 
       // Change cursor on hover
       map.current.on('mouseenter', 'clusters', () => {
@@ -772,6 +796,7 @@ const Map = () => {
     setNearestBin(null);
     setRouteInfo(null);
     setShowBinnedButton(false);
+    setHasActiveRoute(false);
     
     if (userLocation) {
       map.current?.flyTo({
@@ -780,6 +805,18 @@ const Map = () => {
         duration: 1000,
       });
     }
+  };
+
+  const handleCancelRoute = () => {
+    if (map.current?.getSource('route')) {
+      map.current.removeLayer('route');
+      map.current.removeSource('route');
+    }
+    setRouteInfo(null);
+    setShowBinnedButton(false);
+    setNearestBin(null);
+    setHasActiveRoute(false);
+    toast.info('Route cancelled');
   };
 
   return (
@@ -804,6 +841,24 @@ const Map = () => {
         </div>
       )}
       
+      {isCalculatingRoute && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card/90 backdrop-blur-xl px-6 py-4 rounded-2xl shadow-lg border border-border/50 z-50">
+          <div className="text-center space-y-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-3 border-primary border-t-transparent mx-auto"></div>
+            <p className="text-sm text-muted-foreground">Calculating route...</p>
+          </div>
+        </div>
+      )}
+      
+      {hasActiveRoute && nearestBin && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-primary/90 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg border border-primary-foreground/20">
+          <p className="text-sm font-medium text-primary-foreground flex items-center gap-2">
+            <Navigation className="w-4 h-4" />
+            Directions to {nearestBin.name}
+          </p>
+        </div>
+      )}
+      
       <div className="absolute top-6 left-6 z-10 bg-card/90 backdrop-blur-xl rounded-2xl p-3 shadow-lg border border-border/50">
         <img src={logo} alt="bin there" className="h-10 w-auto" />
       </div>
@@ -815,7 +870,7 @@ const Map = () => {
         </p>
       </div>
       
-      <div className="absolute bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
+      <div className="absolute bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col sm:flex-row gap-3 w-full sm:w-auto px-6 sm:px-0">
         {!showBinnedButton ? (
           <div className="flex flex-col items-center gap-2">
             <Button
@@ -836,6 +891,13 @@ const Map = () => {
               Find Another
             </Button>
             <Button
+              onClick={handleCancelRoute}
+              variant="ghost"
+              className="bg-white/90 hover:bg-white text-gray-900 shadow-lg px-4 py-2 h-auto text-sm border border-border"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+            <Button
               onClick={handleBinnedIt}
               className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl px-8 py-6 h-auto text-base font-medium transition-all duration-300 flex items-center gap-2"
             >
@@ -847,7 +909,7 @@ const Map = () => {
       </div>
       
       {routeInfo && (
-        <div className="absolute top-20 left-6 z-10 bg-card/90 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-lg border border-border/50 bounce-enter">
+        <div className="absolute top-24 sm:top-20 left-6 z-10 bg-card/90 backdrop-blur-xl px-5 py-4 rounded-2xl shadow-lg border border-border/50 bounce-enter">
           <div className="flex items-center gap-2 mb-2">
             <div className="text-lg font-semibold text-foreground">
               {routeInfo.distance < 1000 
