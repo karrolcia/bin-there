@@ -14,6 +14,9 @@ const binEventSchema = z.object({
   binName: z.string().trim().min(1).max(200),
   routeDistance: z.number().min(0).optional(),
   routeDuration: z.number().min(0).optional(),
+  userArrivalLat: z.number().min(-90).max(90).optional(),
+  userArrivalLng: z.number().min(-180).max(180).optional(),
+  distanceToBin: z.number().optional(),
 });
 
 Deno.serve(async (req) => {
@@ -72,7 +75,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { binLat, binLng, binName, routeDistance, routeDuration } = result.data;
+    const { binLat, binLng, binName, routeDistance, routeDuration, userArrivalLat, userArrivalLng, distanceToBin } = result.data;
 
     console.log('Tracking bin event:', { userId, binLat, binLng, binName });
 
@@ -86,6 +89,9 @@ Deno.serve(async (req) => {
         bin_name: binName,
         route_distance: routeDistance,
         route_duration: routeDuration,
+        user_arrival_lat: userArrivalLat,
+        user_arrival_lng: userArrivalLng,
+        distance_to_bin: distanceToBin,
       });
 
     if (insertError) {

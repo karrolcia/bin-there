@@ -62,9 +62,12 @@ const Map = () => {
   const [currentZoom, setCurrentZoom] = useState(16);
   const [hasActiveRoute, setHasActiveRoute] = useState(false);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+  const [distanceToBin, setDistanceToBin] = useState<number | null>(null);
+  const [hasArrived, setHasArrived] = useState(false);
   const clusterClickHandlerRef = useRef<((e: any) => void) | null>(null);
   const pointClickHandlerRef = useRef<((e: any) => void) | null>(null);
   const hasActiveRouteRef = useRef(false);
+  const watchIdRef = useRef<number | null>(null);
 
   // Helper functions to create SVG elements securely
   const createUserMarkerSVG = (): SVGSVGElement => {
@@ -390,13 +393,13 @@ const Map = () => {
     toast.success(`Route to ${bin.name} ready!`);
   }, [userLocation, mapboxToken]);
 
+  // Continuous location tracking
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapboxToken) return;
 
-    mapboxgl.accessToken = mapboxToken;
-
+    // Get initial location first
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const userCoords: [number, number] = [
           position.coords.longitude,
           position.coords.latitude,
@@ -407,94 +410,147 @@ const Map = () => {
         trackLocationEvent(true, userCoords);
         trackAppOpened(userCoords);
 
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/light-v11',
-          center: userCoords,
-          zoom: 16,
-        });
+        // Start continuous tracking after getting initial location
+        const watchId = navigator.geolocation.watchPosition(
+          (position) => {
+            const newCoords: [number, number] = [
+              position.coords.longitude,
+              position.coords.latitude,
+            ];
+            setUserLocation(newCoords);
 
-        const userMarkerEl = document.createElement('div');
-        userMarkerEl.className = 'w-10 h-10 bg-accent rounded-full flex items-center justify-center border-3 border-gray-800 shadow-xl';
-        const userSvg = createUserMarkerSVG();
-        userMarkerEl.appendChild(userSvg);
-        
-        const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
-          .setLngLat(userCoords)
-          .setPopup(new mapboxgl.Popup().setText('You are here'))
-          .addTo(map.current);
-        
-        userMarkerRef.current = userMarker;
+            // Update user marker position
+            if (userMarkerRef.current) {
+              userMarkerRef.current.setLngLat(newCoords);
+            }
 
-        const initialRadius = getRadiusForZoom(16);
-        await fetchNearbyTrashCans(userCoords[1], userCoords[0], initialRadius);
+            // Check distance to target bin if route is active
+            if (hasActiveRoute && nearestBin) {
+              const distance = calculateDistance(
+                [nearestBin.coordinates[0], nearestBin.coordinates[1]],
+                newCoords
+              );
+              setDistanceToBin(distance);
 
-        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-        
-        // Set map as loaded
-        map.current.on('load', () => {
-          setIsMapLoading(false);
-        });
-        
-        // If map is already loaded, update state
-        if (map.current.loaded()) {
-          setIsMapLoading(false);
-        }
+              // Check if user has arrived (within 30 meters)
+              if (distance <= 30 && !hasArrived) {
+                setHasArrived(true);
+                toast.success('🎉 You\'ve arrived! Tap "Binned It!" to complete.', {
+                  duration: 5000,
+                });
+              }
+            }
+          },
+          (error) => {
+            console.error('Location tracking error:', error);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 5000,
+            timeout: 10000,
+          }
+        );
 
-        // Add event listeners for dynamic bin loading
-        map.current.on('moveend', (e: any) => {
-          if (!map.current) return;
-          // Skip refetching while a route is active or during programmatic movements/route calc
-          if (hasActiveRouteRef.current) return;
-          if (!e?.originalEvent) return; // ignore fitBounds/flyTo easing
-          if (isCalculatingRoute) return;
-
-          const center = map.current.getCenter();
-          const zoom = map.current.getZoom();
-          setCurrentZoom(zoom);
-          const radius = getRadiusForZoom(zoom);
-
-          clearTimeout(fetchTimeoutRef.current);
-          fetchTimeoutRef.current = setTimeout(() => {
-            fetchNearbyTrashCans(center.lat, center.lng, radius);
-          }, 600);
-        });
-
-        map.current.on('zoomend', (e: any) => {
-          if (!map.current) return;
-          if (hasActiveRouteRef.current) return;
-          if (!e?.originalEvent) return;
-          if (isCalculatingRoute) return;
-
-          const center = map.current.getCenter();
-          const zoom = map.current.getZoom();
-          setCurrentZoom(zoom);
-          const radius = getRadiusForZoom(zoom);
-
-          clearTimeout(fetchTimeoutRef.current);
-          fetchTimeoutRef.current = setTimeout(() => {
-            fetchNearbyTrashCans(center.lat, center.lng, radius);
-          }, 600);
-        });
+        watchIdRef.current = watchId;
       },
       (error) => {
-        console.error('Geolocation error:', error);
-        toast.error('Please enable location services');
-        
-        const fallbackCoords: [number, number] = [24.9384, 60.1699];
-        
-        // Track location denied and app opened without location
+        console.error('Error getting initial location:', error);
         trackLocationEvent(false);
-        trackAppOpened(fallbackCoords);
-        
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current!,
-          style: 'mapbox://styles/mapbox/light-v11',
-          center: fallbackCoords,
-          zoom: 16,
-        });
+        toast.error('Unable to access your location. Please enable location services.');
+        setIsMapLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
       }
     );
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [mapboxToken, hasActiveRoute, nearestBin, hasArrived]);
+
+  useEffect(() => {
+    if (!mapContainer.current || !mapboxToken || !userLocation) return;
+
+    mapboxgl.accessToken = mapboxToken;
+
+    // Track location enabled and app opened
+    trackLocationEvent(true, userLocation);
+    trackAppOpened(userLocation);
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current!,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: userLocation,
+      zoom: 16,
+    });
+
+    const userMarkerEl = document.createElement('div');
+    userMarkerEl.className = 'w-10 h-10 bg-accent rounded-full flex items-center justify-center border-3 border-gray-800 shadow-xl';
+    const userSvg = createUserMarkerSVG();
+    userMarkerEl.appendChild(userSvg);
+    
+    const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
+      .setLngLat(userLocation)
+      .setPopup(new mapboxgl.Popup().setText('You are here'))
+      .addTo(map.current);
+    
+    userMarkerRef.current = userMarker;
+
+    const initialRadius = getRadiusForZoom(16);
+    fetchNearbyTrashCans(userLocation[1], userLocation[0], initialRadius);
+
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    
+    // Set map as loaded
+    map.current.on('load', () => {
+      setIsMapLoading(false);
+    });
+    
+    // If map is already loaded, update state
+    if (map.current.loaded()) {
+      setIsMapLoading(false);
+    }
+
+    // Add event listeners for dynamic bin loading
+    map.current.on('moveend', (e: any) => {
+      if (!map.current) return;
+      // Skip refetching while a route is active or during programmatic movements/route calc
+      if (hasActiveRouteRef.current) return;
+      if (!e?.originalEvent) return; // ignore fitBounds/flyTo easing
+      if (isCalculatingRoute) return;
+
+      const center = map.current.getCenter();
+      const zoom = map.current.getZoom();
+      setCurrentZoom(zoom);
+      const radius = getRadiusForZoom(zoom);
+
+      clearTimeout(fetchTimeoutRef.current);
+      fetchTimeoutRef.current = setTimeout(() => {
+        fetchNearbyTrashCans(center.lat, center.lng, radius);
+      }, 600);
+    });
+
+    map.current.on('zoomend', (e: any) => {
+      if (!map.current) return;
+      if (hasActiveRouteRef.current) return;
+      if (!e?.originalEvent) return;
+      if (isCalculatingRoute) return;
+
+      const center = map.current.getCenter();
+      const zoom = map.current.getZoom();
+      setCurrentZoom(zoom);
+      const radius = getRadiusForZoom(zoom);
+
+      clearTimeout(fetchTimeoutRef.current);
+      fetchTimeoutRef.current = setTimeout(() => {
+        fetchNearbyTrashCans(center.lat, center.lng, radius);
+      }, 600);
+    });
 
     // Cleanup
     return () => {
@@ -790,7 +846,7 @@ const Map = () => {
       trackBinMarked(nearestBin.coordinates, nearestBin.name);
     }
     
-    // Track the bin event in backend
+    // Track the bin event in backend with actual arrival location
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const authHeader = session?.access_token ? `Bearer ${session.access_token}` : undefined;
@@ -802,6 +858,9 @@ const Map = () => {
           binName: nearestBin?.name || 'Unknown Bin',
           routeDistance: routeInfo?.distance,
           routeDuration: routeInfo?.duration,
+          userArrivalLat: userLocation?.[1], // Actual user location
+          userArrivalLng: userLocation?.[0],
+          distanceToBin: distanceToBin,
         },
         headers: authHeader ? { Authorization: authHeader } : undefined,
       });
@@ -834,6 +893,8 @@ const Map = () => {
     setShowBinnedButton(false);
     setHasActiveRoute(false);
     hasActiveRouteRef.current = false;
+    setDistanceToBin(null);
+    setHasArrived(false);
     
     if (userLocation) {
       map.current?.flyTo({
@@ -892,7 +953,15 @@ const Map = () => {
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-primary/90 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg border border-primary-foreground/20">
           <p className="text-sm font-medium text-primary-foreground flex items-center gap-2">
             <Navigation className="w-4 h-4" />
-            Directions to {nearestBin.name}
+            {distanceToBin !== null ? (
+              distanceToBin <= 30 ? (
+                <>🎯 You've arrived at {nearestBin.name}!</>
+              ) : (
+                <>{Math.round(distanceToBin)}m to {nearestBin.name}</>
+              )
+            ) : (
+              <>Directions to {nearestBin.name}</>
+            )}
           </p>
         </div>
       )}
