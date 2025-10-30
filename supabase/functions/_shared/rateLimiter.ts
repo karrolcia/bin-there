@@ -15,8 +15,16 @@ export async function checkRateLimit(
   endpoint: string,
   config: RateLimitConfig
 ): Promise<RateLimitResult> {
-  const restUrl = Deno.env.get('UPSTASH_REDIS_REST_URL');
-  const restToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN');
+  let restUrl = Deno.env.get('UPSTASH_REDIS_REST_URL');
+  let restToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN');
+
+  // Remove quotes if they exist (fix for quoted env vars)
+  if (restUrl?.startsWith('"') && restUrl?.endsWith('"')) {
+    restUrl = restUrl.slice(1, -1);
+  }
+  if (restToken?.startsWith('"') && restToken?.endsWith('"')) {
+    restToken = restToken.slice(1, -1);
+  }
 
   if (!restUrl || !restToken) {
     console.warn('Rate limiter unavailable (missing credentials), allowing request');

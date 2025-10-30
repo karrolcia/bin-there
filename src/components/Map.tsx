@@ -393,13 +393,14 @@ const Map = () => {
     toast.success(`Route to ${bin.name} ready!`);
   }, [userLocation, mapboxToken]);
 
-  // Continuous location tracking
+  // Map initialization with continuous location tracking
   useEffect(() => {
-    if (!mapboxToken) return;
+    if (!mapContainer.current || !mapboxToken) return;
 
-    // Get initial location first
+    mapboxgl.accessToken = mapboxToken;
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const userCoords: [number, number] = [
           position.coords.longitude,
           position.coords.latitude,
@@ -410,7 +411,29 @@ const Map = () => {
         trackLocationEvent(true, userCoords);
         trackAppOpened(userCoords);
 
-        // Start continuous tracking after getting initial location
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current!,
+          style: 'mapbox://styles/mapbox/light-v11',
+          center: userCoords,
+          zoom: 16,
+        });
+
+        const userMarkerEl = document.createElement('div');
+        userMarkerEl.className = 'w-10 h-10 bg-accent rounded-full flex items-center justify-center border-3 border-gray-800 shadow-xl';
+        const userSvg = createUserMarkerSVG();
+        userMarkerEl.appendChild(userSvg);
+        
+        const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
+          .setLngLat(userCoords)
+          .setPopup(new mapboxgl.Popup().setText('You are here'))
+          .addTo(map.current);
+        
+        userMarkerRef.current = userMarker;
+
+        const initialRadius = getRadiusForZoom(16);
+        await fetchNearbyTrashCans(userCoords[1], userCoords[0], initialRadius);
+
+        // Start continuous location tracking
         const watchId = navigator.geolocation.watchPosition(
           (position) => {
             const newCoords: [number, number] = [
@@ -452,11 +475,62 @@ const Map = () => {
         );
 
         watchIdRef.current = watchId;
+
+        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        
+        // Set map as loaded
+        map.current.on('load', () => {
+          setIsMapLoading(false);
+        });
+        
+        // If map is already loaded, update state
+        if (map.current.loaded()) {
+          setIsMapLoading(false);
+        }
+
+        // Add event listeners for dynamic bin loading
+        map.current.on('moveend', (e: any) => {
+          if (!map.current) return;
+          // Skip refetching while a route is active or during programmatic movements/route calc
+          if (hasActiveRouteRef.current) return;
+          if (!e?.originalEvent) return; // ignore fitBounds/flyTo easing
+          if (isCalculatingRoute) return;
+
+          const center = map.current.getCenter();
+          const zoom = map.current.getZoom();
+          setCurrentZoom(zoom);
+          const radius = getRadiusForZoom(zoom);
+
+          clearTimeout(fetchTimeoutRef.current);
+          fetchTimeoutRef.current = setTimeout(() => {
+            fetchNearbyTrashCans(center.lat, center.lng, radius);
+          }, 600);
+        });
+
+        map.current.on('zoomend', (e: any) => {
+          if (!map.current) return;
+          if (hasActiveRouteRef.current) return;
+          if (!e?.originalEvent) return;
+          if (isCalculatingRoute) return;
+
+          const center = map.current.getCenter();
+          const zoom = map.current.getZoom();
+          setCurrentZoom(zoom);
+          const radius = getRadiusForZoom(zoom);
+
+          clearTimeout(fetchTimeoutRef.current);
+          fetchTimeoutRef.current = setTimeout(() => {
+            fetchNearbyTrashCans(center.lat, center.lng, radius);
+          }, 600);
+        });
       },
       (error) => {
-        console.error('Error getting initial location:', error);
+        console.error('Error getting user location:', error);
         trackLocationEvent(false);
-        toast.error('Unable to access your location. Please enable location services.');
+        toast.error(
+          'Unable to access your location. Please enable location services.',
+          { duration: 5000 }
+        );
         setIsMapLoading(false);
       },
       {
@@ -466,95 +540,15 @@ const Map = () => {
       }
     );
 
-    return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      }
-    };
-  }, [mapboxToken, hasActiveRoute, nearestBin, hasArrived]);
-
-  useEffect(() => {
-    if (!mapContainer.current || !mapboxToken || !userLocation) return;
-
-    mapboxgl.accessToken = mapboxToken;
-
-    // Track location enabled and app opened
-    trackLocationEvent(true, userLocation);
-    trackAppOpened(userLocation);
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current!,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: userLocation,
-      zoom: 16,
-    });
-
-    const userMarkerEl = document.createElement('div');
-    userMarkerEl.className = 'w-10 h-10 bg-accent rounded-full flex items-center justify-center border-3 border-gray-800 shadow-xl';
-    const userSvg = createUserMarkerSVG();
-    userMarkerEl.appendChild(userSvg);
-    
-    const userMarker = new mapboxgl.Marker({ element: userMarkerEl })
-      .setLngLat(userLocation)
-      .setPopup(new mapboxgl.Popup().setText('You are here'))
-      .addTo(map.current);
-    
-    userMarkerRef.current = userMarker;
-
-    const initialRadius = getRadiusForZoom(16);
-    fetchNearbyTrashCans(userLocation[1], userLocation[0], initialRadius);
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    
-    // Set map as loaded
-    map.current.on('load', () => {
-      setIsMapLoading(false);
-    });
-    
-    // If map is already loaded, update state
-    if (map.current.loaded()) {
-      setIsMapLoading(false);
-    }
-
-    // Add event listeners for dynamic bin loading
-    map.current.on('moveend', (e: any) => {
-      if (!map.current) return;
-      // Skip refetching while a route is active or during programmatic movements/route calc
-      if (hasActiveRouteRef.current) return;
-      if (!e?.originalEvent) return; // ignore fitBounds/flyTo easing
-      if (isCalculatingRoute) return;
-
-      const center = map.current.getCenter();
-      const zoom = map.current.getZoom();
-      setCurrentZoom(zoom);
-      const radius = getRadiusForZoom(zoom);
-
-      clearTimeout(fetchTimeoutRef.current);
-      fetchTimeoutRef.current = setTimeout(() => {
-        fetchNearbyTrashCans(center.lat, center.lng, radius);
-      }, 600);
-    });
-
-    map.current.on('zoomend', (e: any) => {
-      if (!map.current) return;
-      if (hasActiveRouteRef.current) return;
-      if (!e?.originalEvent) return;
-      if (isCalculatingRoute) return;
-
-      const center = map.current.getCenter();
-      const zoom = map.current.getZoom();
-      setCurrentZoom(zoom);
-      const radius = getRadiusForZoom(zoom);
-
-      clearTimeout(fetchTimeoutRef.current);
-      fetchTimeoutRef.current = setTimeout(() => {
-        fetchNearbyTrashCans(center.lat, center.lng, radius);
-      }, 600);
-    });
-
     // Cleanup
     return () => {
       isMountedRef.current = false;
+      
+      // Stop location tracking
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
       
       // Clean up user marker
       if (userMarkerRef.current) {
@@ -576,7 +570,7 @@ const Map = () => {
         }
       }
     };
-  }, [mapboxToken]);
+  }, [mapboxToken, hasActiveRoute, nearestBin, hasArrived]);
 
   useEffect(() => {
     if (!map.current || trashCans.length === 0) return;
