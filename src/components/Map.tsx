@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { celebrateBinning } from '@/utils/confetti';
 import { BinSuccessModal } from './BinSuccessModal';
-import { Compass, Heart, Trash2, Navigation, X } from 'lucide-react';
+import { Compass, Heart, Trash2, Navigation, X, MapPin } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { supabase } from '@/integrations/supabase/client';
 import { trackAppOpened, trackBinSearched, trackBinMarked, trackRouteCalculated, trackLocationEvent } from '@/utils/activityTracker';
@@ -64,6 +64,7 @@ const Map = () => {
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   const [distanceToBin, setDistanceToBin] = useState<number | null>(null);
   const [hasArrived, setHasArrived] = useState(false);
+  const [isUsingFallbackLocation, setIsUsingFallbackLocation] = useState(false);
   const clusterClickHandlerRef = useRef<((e: any) => void) | null>(null);
   const pointClickHandlerRef = useRef<((e: any) => void) | null>(null);
   const hasActiveRouteRef = useRef(false);
@@ -527,6 +528,7 @@ const Map = () => {
       (error) => {
         console.error('Error getting user location:', error);
         trackLocationEvent(false);
+        setIsUsingFallbackLocation(true);
         
         // Fallback to default location (London)
         const defaultCoords: [number, number] = [-0.1276, 51.5074];
@@ -546,8 +548,8 @@ const Map = () => {
         });
         
         toast.error(
-          'Location access needed to find nearby bins. Please enable location services.',
-          { duration: 8000 }
+          'Location access needed to find nearby bins.',
+          { duration: 5000 }
         );
       },
       {
@@ -916,6 +918,45 @@ const Map = () => {
     }
   };
 
+  const handleRequestLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+
+    toast.info('Requesting location access...');
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords: [number, number] = [
+          position.coords.longitude,
+          position.coords.latitude,
+        ];
+        setUserLocation(coords);
+        setIsUsingFallbackLocation(false);
+        
+        if (map.current) {
+          map.current.flyTo({
+            center: coords,
+            zoom: 14,
+            duration: 2000,
+          });
+        }
+        
+        toast.success('Location access granted!');
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        toast.error('Unable to access location. Please enable location services in your browser settings.');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
   const handleCancelRoute = () => {
     if (map.current?.getSource('route')) {
       map.current.removeLayer('route');
@@ -941,6 +982,19 @@ const Map = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto"></div>
             <p className="text-muted-foreground">Loading map...</p>
           </div>
+        </div>
+      )}
+      
+      {isUsingFallbackLocation && !isMapLoading && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+          <Button
+            onClick={handleRequestLocation}
+            className="bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all"
+            size="lg"
+          >
+            <MapPin className="mr-2 h-5 w-5" />
+            Enable Location
+          </Button>
         </div>
       )}
       
