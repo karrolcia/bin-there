@@ -527,11 +527,28 @@ const Map = () => {
       (error) => {
         console.error('Error getting user location:', error);
         trackLocationEvent(false);
+        
+        // Fallback to default location (London)
+        const defaultCoords: [number, number] = [-0.1276, 51.5074];
+        
+        // Still initialize the map so users can see something
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current!,
+          style: 'mapbox://styles/mapbox/light-v11',
+          center: defaultCoords,
+          zoom: 12,
+        });
+        
+        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        
+        map.current.on('load', () => {
+          setIsMapLoading(false);
+        });
+        
         toast.error(
-          'Unable to access your location. Please enable location services.',
-          { duration: 5000 }
+          'Location access needed to find nearby bins. Please enable location services.',
+          { duration: 8000 }
         );
-        setIsMapLoading(false);
       },
       {
         enableHighAccuracy: true,
@@ -570,7 +587,7 @@ const Map = () => {
         }
       }
     };
-  }, [mapboxToken, hasActiveRoute, nearestBin, hasArrived]);
+  }, [mapboxToken]);
 
   useEffect(() => {
     if (!map.current || trashCans.length === 0) return;
@@ -909,6 +926,8 @@ const Map = () => {
     setNearestBin(null);
     setHasActiveRoute(false);
     hasActiveRouteRef.current = false;
+    setDistanceToBin(null);
+    setHasArrived(false);
     toast.info('Route cancelled');
   };
 
