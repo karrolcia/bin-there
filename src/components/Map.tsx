@@ -141,7 +141,13 @@ const Map = () => {
         
         if (error) {
           console.error('Error fetching Mapbox token:', error);
-          toast.error('Failed to load map configuration');
+          
+          // Check if it's an authentication error
+          if (error.message?.includes('Authentication required') || error.message?.includes('Invalid authentication')) {
+            toast.error('Please sign in to use the map', { duration: 5000 });
+          } else {
+            toast.error('Failed to load map configuration');
+          }
           return;
         }
         
