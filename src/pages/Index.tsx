@@ -1,14 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Map from '@/components/Map';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { StatsDisplay } from '@/components/StatsDisplay';
 import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import logo from '@/assets/logo.svg';
 
 const Index = () => {
   const [showMap, setShowMap] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Set up auth listener BEFORE checking session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (showMap) {
     return (
@@ -47,7 +66,13 @@ const Index = () => {
         </div>
 
         <Button
-          onClick={() => setShowMap(true)}
+          onClick={() => {
+            if (user) {
+              setShowMap(true);
+            } else {
+              setShowAuthModal(true);
+            }
+          }}
           className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-medium h-auto shadow-lg hover:shadow-xl transition-all duration-300 fade-up-enter"
           style={{ animationDelay: '0.2s' }}
           aria-label="Start finding nearby trash cans"
