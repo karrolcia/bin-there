@@ -66,13 +66,7 @@ const Index = () => {
         </div>
 
         <Button
-          onClick={() => {
-            if (user) {
-              setShowMap(true);
-            } else {
-              setShowAuthModal(true);
-            }
-          }}
+          onClick={() => setShowMap(true)}
           className="pulse-hover bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-medium h-auto shadow-lg hover:shadow-xl transition-all duration-300 fade-up-enter"
           style={{ animationDelay: '0.2s' }}
           aria-label="Start finding nearby trash cans"
