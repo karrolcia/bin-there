@@ -1,0 +1,722 @@
+[
+  {
+    "slug": "helsinki",
+    "name": "Helsinki",
+    "country": "finland",
+    "countryName": "Finland",
+    "lat": 60.1699,
+    "lng": 24.9384,
+    "radiusKm": 8
+  },
+  {
+    "slug": "stockholm",
+    "name": "Stockholm",
+    "country": "sweden",
+    "countryName": "Sweden",
+    "lat": 59.3293,
+    "lng": 18.0686,
+    "radiusKm": 8
+  },
+  {
+    "slug": "copenhagen",
+    "name": "Copenhagen",
+    "country": "denmark",
+    "countryName": "Denmark",
+    "lat": 55.6761,
+    "lng": 12.5683,
+    "radiusKm": 8
+  },
+  {
+    "slug": "oslo",
+    "name": "Oslo",
+    "country": "norway",
+    "countryName": "Norway",
+    "lat": 59.9139,
+    "lng": 10.7522,
+    "radiusKm": 8
+  },
+  {
+    "slug": "turku",
+    "name": "Turku",
+    "country": "finland",
+    "countryName": "Finland",
+    "lat": 60.4518,
+    "lng": 22.2666,
+    "radiusKm": 5
+  },
+  {
+    "slug": "tampere",
+    "name": "Tampere",
+    "country": "finland",
+    "countryName": "Finland",
+    "lat": 61.4978,
+    "lng": 23.7610,
+    "radiusKm": 5
+  },
+  {
+    "slug": "espoo",
+    "name": "Espoo",
+    "country": "finland",
+    "countryName": "Finland",
+    "lat": 60.2055,
+    "lng": 24.6559,
+    "radiusKm": 5
+  },
+  {
+    "slug": "gothenburg",
+    "name": "Gothenburg",
+    "country": "sweden",
+    "countryName": "Sweden",
+    "lat": 57.7089,
+    "lng": 11.9746,
+    "radiusKm": 8
+  },
+  {
+    "slug": "malmo",
+    "name": "Malmo",
+    "country": "sweden",
+    "countryName": "Sweden",
+    "lat": 55.6050,
+    "lng": 13.0038,
+    "radiusKm": 5
+  },
+  {
+    "slug": "berlin",
+    "name": "Berlin",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 52.5200,
+    "lng": 13.4050,
+    "radiusKm": 8
+  },
+  {
+    "slug": "munich",
+    "name": "Munich",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 48.1351,
+    "lng": 11.5820,
+    "radiusKm": 8
+  },
+  {
+    "slug": "hamburg",
+    "name": "Hamburg",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 53.5511,
+    "lng": 9.9937,
+    "radiusKm": 8
+  },
+  {
+    "slug": "frankfurt",
+    "name": "Frankfurt",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 50.1109,
+    "lng": 8.6821,
+    "radiusKm": 8
+  },
+  {
+    "slug": "cologne",
+    "name": "Cologne",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 50.9375,
+    "lng": 6.9603,
+    "radiusKm": 8
+  },
+  {
+    "slug": "stuttgart",
+    "name": "Stuttgart",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 48.7758,
+    "lng": 9.1829,
+    "radiusKm": 8
+  },
+  {
+    "slug": "dusseldorf",
+    "name": "Dusseldorf",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 51.2277,
+    "lng": 6.7735,
+    "radiusKm": 8
+  },
+  {
+    "slug": "dresden",
+    "name": "Dresden",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 51.0504,
+    "lng": 13.7373,
+    "radiusKm": 5
+  },
+  {
+    "slug": "leipzig",
+    "name": "Leipzig",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 51.3397,
+    "lng": 12.3731,
+    "radiusKm": 5
+  },
+  {
+    "slug": "amsterdam",
+    "name": "Amsterdam",
+    "country": "netherlands",
+    "countryName": "Netherlands",
+    "lat": 52.3676,
+    "lng": 4.9041,
+    "radiusKm": 8
+  },
+  {
+    "slug": "rotterdam",
+    "name": "Rotterdam",
+    "country": "netherlands",
+    "countryName": "Netherlands",
+    "lat": 51.9244,
+    "lng": 4.4777,
+    "radiusKm": 8
+  },
+  {
+    "slug": "the-hague",
+    "name": "The Hague",
+    "country": "netherlands",
+    "countryName": "Netherlands",
+    "lat": 52.0705,
+    "lng": 4.3007,
+    "radiusKm": 5
+  },
+  {
+    "slug": "utrecht",
+    "name": "Utrecht",
+    "country": "netherlands",
+    "countryName": "Netherlands",
+    "lat": 52.0907,
+    "lng": 5.1214,
+    "radiusKm": 5
+  },
+  {
+    "slug": "eindhoven",
+    "name": "Eindhoven",
+    "country": "netherlands",
+    "countryName": "Netherlands",
+    "lat": 51.4416,
+    "lng": 5.4697,
+    "radiusKm": 5
+  },
+  {
+    "slug": "london",
+    "name": "London",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 51.5074,
+    "lng": -0.1278,
+    "radiusKm": 8
+  },
+  {
+    "slug": "manchester",
+    "name": "Manchester",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 53.4808,
+    "lng": -2.2426,
+    "radiusKm": 8
+  },
+  {
+    "slug": "edinburgh",
+    "name": "Edinburgh",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 55.9533,
+    "lng": -3.1883,
+    "radiusKm": 5
+  },
+  {
+    "slug": "birmingham",
+    "name": "Birmingham",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 52.4862,
+    "lng": -1.8904,
+    "radiusKm": 8
+  },
+  {
+    "slug": "bristol",
+    "name": "Bristol",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 51.4545,
+    "lng": -2.5879,
+    "radiusKm": 5
+  },
+  {
+    "slug": "leeds",
+    "name": "Leeds",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 53.8008,
+    "lng": -1.5491,
+    "radiusKm": 8
+  },
+  {
+    "slug": "glasgow",
+    "name": "Glasgow",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 55.8642,
+    "lng": -4.2518,
+    "radiusKm": 8
+  },
+  {
+    "slug": "liverpool",
+    "name": "Liverpool",
+    "country": "uk",
+    "countryName": "United Kingdom",
+    "lat": 53.4084,
+    "lng": -2.9916,
+    "radiusKm": 8
+  },
+  {
+    "slug": "paris",
+    "name": "Paris",
+    "country": "france",
+    "countryName": "France",
+    "lat": 48.8566,
+    "lng": 2.3522,
+    "radiusKm": 8
+  },
+  {
+    "slug": "lyon",
+    "name": "Lyon",
+    "country": "france",
+    "countryName": "France",
+    "lat": 45.7640,
+    "lng": 4.8357,
+    "radiusKm": 8
+  },
+  {
+    "slug": "marseille",
+    "name": "Marseille",
+    "country": "france",
+    "countryName": "France",
+    "lat": 43.2965,
+    "lng": 5.3698,
+    "radiusKm": 8
+  },
+  {
+    "slug": "toulouse",
+    "name": "Toulouse",
+    "country": "france",
+    "countryName": "France",
+    "lat": 43.6047,
+    "lng": 1.4442,
+    "radiusKm": 8
+  },
+  {
+    "slug": "nice",
+    "name": "Nice",
+    "country": "france",
+    "countryName": "France",
+    "lat": 43.7102,
+    "lng": 7.2620,
+    "radiusKm": 5
+  },
+  {
+    "slug": "bordeaux",
+    "name": "Bordeaux",
+    "country": "france",
+    "countryName": "France",
+    "lat": 44.8378,
+    "lng": -0.5792,
+    "radiusKm": 8
+  },
+  {
+    "slug": "strasbourg",
+    "name": "Strasbourg",
+    "country": "france",
+    "countryName": "France",
+    "lat": 48.5734,
+    "lng": 7.7521,
+    "radiusKm": 5
+  },
+  {
+    "slug": "brussels",
+    "name": "Brussels",
+    "country": "belgium",
+    "countryName": "Belgium",
+    "lat": 50.8503,
+    "lng": 4.3517,
+    "radiusKm": 8
+  },
+  {
+    "slug": "antwerp",
+    "name": "Antwerp",
+    "country": "belgium",
+    "countryName": "Belgium",
+    "lat": 51.2194,
+    "lng": 4.4025,
+    "radiusKm": 8
+  },
+  {
+    "slug": "ghent",
+    "name": "Ghent",
+    "country": "belgium",
+    "countryName": "Belgium",
+    "lat": 51.0543,
+    "lng": 3.7174,
+    "radiusKm": 5
+  },
+  {
+    "slug": "zurich",
+    "name": "Zurich",
+    "country": "switzerland",
+    "countryName": "Switzerland",
+    "lat": 47.3769,
+    "lng": 8.5417,
+    "radiusKm": 8
+  },
+  {
+    "slug": "geneva",
+    "name": "Geneva",
+    "country": "switzerland",
+    "countryName": "Switzerland",
+    "lat": 46.2044,
+    "lng": 6.1432,
+    "radiusKm": 5
+  },
+  {
+    "slug": "basel",
+    "name": "Basel",
+    "country": "switzerland",
+    "countryName": "Switzerland",
+    "lat": 47.5596,
+    "lng": 7.5886,
+    "radiusKm": 5
+  },
+  {
+    "slug": "bern",
+    "name": "Bern",
+    "country": "switzerland",
+    "countryName": "Switzerland",
+    "lat": 46.9480,
+    "lng": 7.4474,
+    "radiusKm": 5
+  },
+  {
+    "slug": "vienna",
+    "name": "Vienna",
+    "country": "austria",
+    "countryName": "Austria",
+    "lat": 48.2082,
+    "lng": 16.3738,
+    "radiusKm": 8
+  },
+  {
+    "slug": "salzburg",
+    "name": "Salzburg",
+    "country": "austria",
+    "countryName": "Austria",
+    "lat": 47.8095,
+    "lng": 13.0550,
+    "radiusKm": 5
+  },
+  {
+    "slug": "graz",
+    "name": "Graz",
+    "country": "austria",
+    "countryName": "Austria",
+    "lat": 47.0707,
+    "lng": 15.4395,
+    "radiusKm": 5
+  },
+  {
+    "slug": "warsaw",
+    "name": "Warsaw",
+    "country": "poland",
+    "countryName": "Poland",
+    "lat": 52.2297,
+    "lng": 21.0122,
+    "radiusKm": 8
+  },
+  {
+    "slug": "krakow",
+    "name": "Krakow",
+    "country": "poland",
+    "countryName": "Poland",
+    "lat": 50.0647,
+    "lng": 19.9450,
+    "radiusKm": 8
+  },
+  {
+    "slug": "wroclaw",
+    "name": "Wroclaw",
+    "country": "poland",
+    "countryName": "Poland",
+    "lat": 51.1079,
+    "lng": 17.0385,
+    "radiusKm": 8
+  },
+  {
+    "slug": "gdansk",
+    "name": "Gdansk",
+    "country": "poland",
+    "countryName": "Poland",
+    "lat": 54.3520,
+    "lng": 18.6466,
+    "radiusKm": 5
+  },
+  {
+    "slug": "prague",
+    "name": "Prague",
+    "country": "czech-republic",
+    "countryName": "Czech Republic",
+    "lat": 50.0755,
+    "lng": 14.4378,
+    "radiusKm": 8
+  },
+  {
+    "slug": "brno",
+    "name": "Brno",
+    "country": "czech-republic",
+    "countryName": "Czech Republic",
+    "lat": 49.1951,
+    "lng": 16.6068,
+    "radiusKm": 5
+  },
+  {
+    "slug": "madrid",
+    "name": "Madrid",
+    "country": "spain",
+    "countryName": "Spain",
+    "lat": 40.4168,
+    "lng": -3.7038,
+    "radiusKm": 8
+  },
+  {
+    "slug": "barcelona",
+    "name": "Barcelona",
+    "country": "spain",
+    "countryName": "Spain",
+    "lat": 41.3874,
+    "lng": 2.1686,
+    "radiusKm": 8
+  },
+  {
+    "slug": "valencia",
+    "name": "Valencia",
+    "country": "spain",
+    "countryName": "Spain",
+    "lat": 39.4699,
+    "lng": -0.3763,
+    "radiusKm": 8
+  },
+  {
+    "slug": "rome",
+    "name": "Rome",
+    "country": "italy",
+    "countryName": "Italy",
+    "lat": 41.9028,
+    "lng": 12.4964,
+    "radiusKm": 8
+  },
+  {
+    "slug": "milan",
+    "name": "Milan",
+    "country": "italy",
+    "countryName": "Italy",
+    "lat": 45.4642,
+    "lng": 9.1900,
+    "radiusKm": 8
+  },
+  {
+    "slug": "florence",
+    "name": "Florence",
+    "country": "italy",
+    "countryName": "Italy",
+    "lat": 43.7696,
+    "lng": 11.2558,
+    "radiusKm": 5
+  },
+  {
+    "slug": "new-york",
+    "name": "New York",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 40.7128,
+    "lng": -74.0060,
+    "radiusKm": 8
+  },
+  {
+    "slug": "san-francisco",
+    "name": "San Francisco",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 37.7749,
+    "lng": -122.4194,
+    "radiusKm": 8
+  },
+  {
+    "slug": "chicago",
+    "name": "Chicago",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 41.8781,
+    "lng": -87.6298,
+    "radiusKm": 8
+  },
+  {
+    "slug": "portland",
+    "name": "Portland",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 45.5152,
+    "lng": -122.6784,
+    "radiusKm": 8
+  },
+  {
+    "slug": "seattle",
+    "name": "Seattle",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 47.6062,
+    "lng": -122.3321,
+    "radiusKm": 8
+  },
+  {
+    "slug": "boston",
+    "name": "Boston",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 42.3601,
+    "lng": -71.0589,
+    "radiusKm": 8
+  },
+  {
+    "slug": "washington-dc",
+    "name": "Washington DC",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 38.9072,
+    "lng": -77.0369,
+    "radiusKm": 8
+  },
+  {
+    "slug": "los-angeles",
+    "name": "Los Angeles",
+    "country": "usa",
+    "countryName": "United States",
+    "lat": 34.0522,
+    "lng": -118.2437,
+    "radiusKm": 8
+  },
+  {
+    "slug": "toronto",
+    "name": "Toronto",
+    "country": "canada",
+    "countryName": "Canada",
+    "lat": 43.6532,
+    "lng": -79.3832,
+    "radiusKm": 8
+  },
+  {
+    "slug": "vancouver",
+    "name": "Vancouver",
+    "country": "canada",
+    "countryName": "Canada",
+    "lat": 49.2827,
+    "lng": -123.1207,
+    "radiusKm": 8
+  },
+  {
+    "slug": "montreal",
+    "name": "Montreal",
+    "country": "canada",
+    "countryName": "Canada",
+    "lat": 45.5017,
+    "lng": -73.5673,
+    "radiusKm": 8
+  },
+  {
+    "slug": "sydney",
+    "name": "Sydney",
+    "country": "australia",
+    "countryName": "Australia",
+    "lat": -33.8688,
+    "lng": 151.2093,
+    "radiusKm": 8
+  },
+  {
+    "slug": "melbourne",
+    "name": "Melbourne",
+    "country": "australia",
+    "countryName": "Australia",
+    "lat": -37.8136,
+    "lng": 144.9631,
+    "radiusKm": 8
+  },
+  {
+    "slug": "lisbon",
+    "name": "Lisbon",
+    "country": "portugal",
+    "countryName": "Portugal",
+    "lat": 38.7223,
+    "lng": -9.1393,
+    "radiusKm": 8
+  },
+  {
+    "slug": "dublin",
+    "name": "Dublin",
+    "country": "ireland",
+    "countryName": "Ireland",
+    "lat": 53.3498,
+    "lng": -6.2603,
+    "radiusKm": 8
+  },
+  {
+    "slug": "budapest",
+    "name": "Budapest",
+    "country": "hungary",
+    "countryName": "Hungary",
+    "lat": 47.4979,
+    "lng": 19.0402,
+    "radiusKm": 8
+  },
+  {
+    "slug": "hannover",
+    "name": "Hannover",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 52.3759,
+    "lng": 9.7320,
+    "radiusKm": 5
+  },
+  {
+    "slug": "nuremberg",
+    "name": "Nuremberg",
+    "country": "germany",
+    "countryName": "Germany",
+    "lat": 49.4521,
+    "lng": 11.0767,
+    "radiusKm": 5
+  },
+  {
+    "slug": "aarhus",
+    "name": "Aarhus",
+    "country": "denmark",
+    "countryName": "Denmark",
+    "lat": 56.1629,
+    "lng": 10.2039,
+    "radiusKm": 5
+  },
+  {
+    "slug": "bergen",
+    "name": "Bergen",
+    "country": "norway",
+    "countryName": "Norway",
+    "lat": 60.3913,
+    "lng": 5.3221,
+    "radiusKm": 5
+  }
+]

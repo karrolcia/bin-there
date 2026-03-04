@@ -1,20 +1,38 @@
-import { useState } from 'react';
-import Map from '@/components/Map';
+import { useState, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { StatsDisplay } from '@/components/StatsDisplay';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import logo from '@/assets/logo.svg';
 
+const Map = lazy(() => import('@/components/Map'));
+
 const Index = () => {
-  const [showMap, setShowMap] = useState(false);
+  const [searchParams] = useSearchParams();
+  const latParam = searchParams.get('lat');
+  const lngParam = searchParams.get('lng');
+  const initialCenter = latParam && lngParam
+    ? { lat: parseFloat(latParam), lng: parseFloat(lngParam) }
+    : undefined;
+
+  const [showMap, setShowMap] = useState(!!initialCenter);
+
+  useSEO({
+    title: "bin there - Find the Nearest Trash Can",
+    description: "Find the nearest public trash can instantly with bin there. Never walk around with a poop bag again! Simple, fast, and free bin locator for responsible waste disposal.",
+    path: "/"
+  });
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   if (showMap) {
     return (
       <>
         <StatsDisplay />
-        <Map />
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-muted-foreground">Loading map...</div></div>}>
+          <Map initialCenter={initialCenter} />
+        </Suspense>
       </>
     );
   }
