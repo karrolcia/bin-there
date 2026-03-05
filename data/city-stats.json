@@ -797,11 +797,7 @@
     "dogBins": 19,
     "densityPerKm2": 6.3,
     "nearbyCities": [
-      "melbourne",
-      "san-francisco",
-      "los-angeles",
-      "portland",
-      "seattle"
+      "melbourne"
     ],
     "lastUpdated": "2026-03-04"
   },
@@ -810,11 +806,7 @@
     "dogBins": 13,
     "densityPerKm2": 7.6,
     "nearbyCities": [
-      "sydney",
-      "san-francisco",
-      "los-angeles",
-      "portland",
-      "seattle"
+      "sydney"
     ],
     "lastUpdated": "2026-03-04"
   },

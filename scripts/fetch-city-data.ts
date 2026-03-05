@@ -69,20 +69,19 @@ function haversine(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Return 3-5 nearest city slugs sorted by distance. */
+/** Return up to 5 nearest city slugs sorted by distance, max 2000 km. */
 function findNearbyCities(target: City, allCities: City[]): string[] {
+  const MAX_DISTANCE_KM = 2000;
   const distances = allCities
     .filter((c) => c.slug !== target.slug)
     .map((c) => ({
       slug: c.slug,
       dist: haversine(target.lat, target.lng, c.lat, c.lng),
     }))
+    .filter((d) => d.dist <= MAX_DISTANCE_KM)
     .sort((a, b) => a.dist - b.dist);
 
-  // Take up to 5, but at least 3 if available
-  const maxNearby = Math.min(5, distances.length);
-  const count = Math.max(3, maxNearby);
-  return distances.slice(0, count).map((d) => d.slug);
+  return distances.slice(0, 5).map((d) => d.slug);
 }
 
 /** Sleep for ms milliseconds. */
