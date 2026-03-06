@@ -1,10 +1,12 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { StatsDisplay } from '@/components/StatsDisplay';
 import { Footer } from '@/components/Footer';
 import { useSEO } from '@/hooks/useSEO';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import logo from '@/assets/logo.svg';
 
 const Map = lazy(() => import('@/components/Map'));
@@ -25,6 +27,23 @@ const Index = () => {
     path: "/"
   });
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Set up auth listener BEFORE checking session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (showMap) {
     return (
@@ -49,14 +68,14 @@ const Index = () => {
             Sign in
           </button>
         </header>
-        
+
         <div className="flex-1 flex items-center justify-center pb-16">
           <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
           <div className="space-y-8 fade-up-enter">
-            <img 
-              src={logo} 
-              alt="bin there" 
-              className="h-28 md:h-36 mx-auto" 
+            <img
+              src={logo}
+              alt="bin there"
+              className="h-28 md:h-36 mx-auto"
               style={{ animationDelay: '0s' }}
             />
           <p className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed" style={{ animationDelay: '0.1s' }}>
@@ -74,9 +93,9 @@ const Index = () => {
         </Button>
         </div>
       </div>
-      
+
       <AuthModal
-          open={showAuthModal} 
+          open={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onSuccess={() => {
             setShowAuthModal(false);

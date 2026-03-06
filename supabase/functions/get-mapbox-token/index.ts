@@ -39,38 +39,28 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const authHeader = req.headers.get('Authorization');
 
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    // Try to get user if authenticated (optional)
+    let userId: string | null = null;
+    
+    if (authHeader) {
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      });
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id ?? null;
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: {
-        headers: { Authorization: authHeader },
-      },
-    });
+    // Get client IP for rate limiting unauthenticated requests
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+      || req.headers.get('cf-connecting-ip') 
+      || 'unknown';
 
-    // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      console.error('Authentication error:', authError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Use user ID for rate limiting (more secure than IP)
-    const rateLimitResult = checkRateLimit(user.id);
+    // Rate limit by user ID if authenticated, otherwise by IP
+    const rateLimitKey = userId || `ip:${clientIP}`;
+    const rateLimitResult = checkRateLimit(rateLimitKey);
     
     if (!rateLimitResult.allowed) {
       return new Response(
