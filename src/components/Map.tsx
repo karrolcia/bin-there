@@ -44,7 +44,11 @@ interface TrashCan {
   name: string;
 }
 
-const Map = () => {
+interface MapProps {
+  initialCenter?: { lat: number; lng: number };
+}
+
+const Map = ({ initialCenter }: MapProps = {}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -536,8 +540,10 @@ const Map = () => {
         trackLocationEvent(false);
         setIsUsingFallbackLocation(true);
         
-        // Fallback to default location (London)
-        const defaultCoords: [number, number] = [-0.1276, 51.5074];
+        // Fallback to initialCenter or default location (London)
+        const defaultCoords: [number, number] = initialCenter
+          ? [initialCenter.lng, initialCenter.lat]
+          : [-0.1276, 51.5074];
         
         // Still initialize the map so users can see something
         map.current = new mapboxgl.Map({

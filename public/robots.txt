@@ -10,7 +10,23 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
 User-agent: *
 Allow: /
 
-Sitemap: REPLACE_WITH_YOUR_DOMAIN/sitemap.xml
+Sitemap: https://binthere.online/sitemap.xml

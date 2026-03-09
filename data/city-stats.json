@@ -1,0 +1,1034 @@
+{
+  "helsinki": {
+    "totalBins": 1247,
+    "dogBins": 89,
+    "densityPerKm2": 6.2,
+    "nearbyCities": [
+      "espoo",
+      "turku",
+      "tampere",
+      "stockholm",
+      "gdansk"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "stockholm": {
+    "totalBins": 2025,
+    "dogBins": 1,
+    "densityPerKm2": 10.1,
+    "nearbyCities": [
+      "turku",
+      "espoo",
+      "tampere",
+      "helsinki",
+      "gothenburg"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "espoo": {
+    "totalBins": 412,
+    "dogBins": 31,
+    "densityPerKm2": 5.3,
+    "nearbyCities": [
+      "helsinki",
+      "turku",
+      "tampere",
+      "stockholm",
+      "gdansk"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "berlin": {
+    "totalBins": 8934,
+    "dogBins": 245,
+    "densityPerKm2": 10,
+    "nearbyCities": [
+      "leipzig",
+      "dresden",
+      "hannover",
+      "hamburg",
+      "prague"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "london": {
+    "totalBins": 5621,
+    "dogBins": 312,
+    "densityPerKm2": 8.9,
+    "nearbyCities": [
+      "birmingham",
+      "bristol",
+      "manchester",
+      "ghent",
+      "leeds"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "amsterdam": {
+    "totalBins": 3845,
+    "dogBins": 156,
+    "densityPerKm2": 18.7,
+    "nearbyCities": [
+      "utrecht",
+      "the-hague",
+      "rotterdam",
+      "eindhoven",
+      "antwerp"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "paris": {
+    "totalBins": 7234,
+    "dogBins": 98,
+    "densityPerKm2": 9.1,
+    "nearbyCities": [
+      "ghent",
+      "brussels",
+      "antwerp",
+      "london",
+      "eindhoven"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "copenhagen": {
+    "totalBins": 2156,
+    "dogBins": 67,
+    "densityPerKm2": 11.3,
+    "nearbyCities": [
+      "malmo",
+      "aarhus",
+      "gothenburg",
+      "hamburg",
+      "berlin"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "munich": {
+    "totalBins": 4521,
+    "dogBins": 178,
+    "densityPerKm2": 14.6,
+    "nearbyCities": [
+      "salzburg",
+      "nuremberg",
+      "stuttgart",
+      "zurich",
+      "strasbourg"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "new-york": {
+    "totalBins": 3289,
+    "dogBins": 0,
+    "densityPerKm2": 5.3,
+    "nearbyCities": [
+      "boston",
+      "washington-dc",
+      "montreal",
+      "toronto",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-03"
+  },
+  "oslo": {
+    "totalBins": 689,
+    "dogBins": 1,
+    "densityPerKm2": 3.4,
+    "nearbyCities": [
+      "gothenburg",
+      "bergen",
+      "stockholm",
+      "aarhus",
+      "copenhagen"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "turku": {
+    "totalBins": 827,
+    "dogBins": 6,
+    "densityPerKm2": 10.5,
+    "nearbyCities": [
+      "espoo",
+      "tampere",
+      "helsinki",
+      "stockholm",
+      "oslo"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "tampere": {
+    "totalBins": 719,
+    "dogBins": 0,
+    "densityPerKm2": 9.2,
+    "nearbyCities": [
+      "turku",
+      "espoo",
+      "helsinki",
+      "stockholm",
+      "oslo"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "gothenburg": {
+    "totalBins": 1564,
+    "dogBins": 8,
+    "densityPerKm2": 7.8,
+    "nearbyCities": [
+      "aarhus",
+      "copenhagen",
+      "malmo",
+      "oslo",
+      "stockholm"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "malmo": {
+    "totalBins": 1097,
+    "dogBins": 182,
+    "densityPerKm2": 14,
+    "nearbyCities": [
+      "copenhagen",
+      "aarhus",
+      "gothenburg",
+      "hamburg",
+      "berlin"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "frankfurt": {
+    "totalBins": 3183,
+    "dogBins": 2,
+    "densityPerKm2": 15.8,
+    "nearbyCities": [
+      "cologne",
+      "stuttgart",
+      "dusseldorf",
+      "strasbourg",
+      "nuremberg"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "cologne": {
+    "totalBins": 4211,
+    "dogBins": 24,
+    "densityPerKm2": 20.9,
+    "nearbyCities": [
+      "dusseldorf",
+      "eindhoven",
+      "frankfurt",
+      "utrecht",
+      "antwerp"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "stuttgart": {
+    "totalBins": 3173,
+    "dogBins": 11,
+    "densityPerKm2": 15.8,
+    "nearbyCities": [
+      "strasbourg",
+      "frankfurt",
+      "nuremberg",
+      "zurich",
+      "basel"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "dusseldorf": {
+    "totalBins": 3083,
+    "dogBins": 2,
+    "densityPerKm2": 15.3,
+    "nearbyCities": [
+      "cologne",
+      "eindhoven",
+      "utrecht",
+      "antwerp",
+      "brussels"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "dresden": {
+    "totalBins": 1777,
+    "dogBins": 37,
+    "densityPerKm2": 22.6,
+    "nearbyCities": [
+      "leipzig",
+      "prague",
+      "berlin",
+      "wroclaw",
+      "nuremberg"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "leipzig": {
+    "totalBins": 1375,
+    "dogBins": 7,
+    "densityPerKm2": 17.5,
+    "nearbyCities": [
+      "dresden",
+      "berlin",
+      "prague",
+      "hannover",
+      "nuremberg"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "rotterdam": {
+    "totalBins": 1256,
+    "dogBins": 4,
+    "densityPerKm2": 6.2,
+    "nearbyCities": [
+      "the-hague",
+      "utrecht",
+      "amsterdam",
+      "antwerp",
+      "eindhoven"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "the-hague": {
+    "totalBins": 1109,
+    "dogBins": 9,
+    "densityPerKm2": 14.1,
+    "nearbyCities": [
+      "rotterdam",
+      "amsterdam",
+      "utrecht",
+      "antwerp",
+      "eindhoven"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "utrecht": {
+    "totalBins": 4197,
+    "dogBins": 0,
+    "densityPerKm2": 53.4,
+    "nearbyCities": [
+      "amsterdam",
+      "rotterdam",
+      "the-hague",
+      "eindhoven",
+      "antwerp"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "eindhoven": {
+    "totalBins": 1172,
+    "dogBins": 16,
+    "densityPerKm2": 14.9,
+    "nearbyCities": [
+      "utrecht",
+      "antwerp",
+      "rotterdam",
+      "dusseldorf",
+      "brussels"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "manchester": {
+    "totalBins": 594,
+    "dogBins": 53,
+    "densityPerKm2": 3,
+    "nearbyCities": [
+      "liverpool",
+      "leeds",
+      "birmingham",
+      "bristol",
+      "london"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "edinburgh": {
+    "totalBins": 664,
+    "dogBins": 6,
+    "densityPerKm2": 8.5,
+    "nearbyCities": [
+      "glasgow",
+      "leeds",
+      "manchester",
+      "liverpool",
+      "dublin"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "birmingham": {
+    "totalBins": 596,
+    "dogBins": 28,
+    "densityPerKm2": 3,
+    "nearbyCities": [
+      "manchester",
+      "bristol",
+      "liverpool",
+      "leeds",
+      "london"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "bristol": {
+    "totalBins": 1177,
+    "dogBins": 56,
+    "densityPerKm2": 15,
+    "nearbyCities": [
+      "birmingham",
+      "london",
+      "liverpool",
+      "manchester",
+      "leeds"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "leeds": {
+    "totalBins": 3134,
+    "dogBins": 23,
+    "densityPerKm2": 15.6,
+    "nearbyCities": [
+      "manchester",
+      "liverpool",
+      "birmingham",
+      "edinburgh",
+      "bristol"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "glasgow": {
+    "totalBins": 674,
+    "dogBins": 75,
+    "densityPerKm2": 3.4,
+    "nearbyCities": [
+      "edinburgh",
+      "liverpool",
+      "leeds",
+      "manchester",
+      "dublin"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "liverpool": {
+    "totalBins": 395,
+    "dogBins": 15,
+    "densityPerKm2": 2,
+    "nearbyCities": [
+      "manchester",
+      "leeds",
+      "birmingham",
+      "dublin",
+      "bristol"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "marseille": {
+    "totalBins": 717,
+    "dogBins": 4,
+    "densityPerKm2": 3.6,
+    "nearbyCities": [
+      "nice",
+      "lyon",
+      "toulouse",
+      "geneva",
+      "barcelona"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "toulouse": {
+    "totalBins": 2376,
+    "dogBins": 32,
+    "densityPerKm2": 11.8,
+    "nearbyCities": [
+      "bordeaux",
+      "barcelona",
+      "marseille",
+      "lyon",
+      "nice"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "nice": {
+    "totalBins": 591,
+    "dogBins": 1,
+    "densityPerKm2": 7.5,
+    "nearbyCities": [
+      "marseille",
+      "milan",
+      "geneva",
+      "lyon",
+      "florence"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "bordeaux": {
+    "totalBins": 1980,
+    "dogBins": 29,
+    "densityPerKm2": 9.8,
+    "nearbyCities": [
+      "toulouse",
+      "lyon",
+      "barcelona",
+      "paris",
+      "marseille"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "antwerp": {
+    "totalBins": 1163,
+    "dogBins": 13,
+    "densityPerKm2": 5.8,
+    "nearbyCities": [
+      "brussels",
+      "ghent",
+      "eindhoven",
+      "rotterdam",
+      "the-hague"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "ghent": {
+    "totalBins": 872,
+    "dogBins": 2,
+    "densityPerKm2": 11.1,
+    "nearbyCities": [
+      "brussels",
+      "antwerp",
+      "rotterdam",
+      "the-hague",
+      "eindhoven"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "zurich": {
+    "totalBins": 3807,
+    "dogBins": 127,
+    "densityPerKm2": 18.9,
+    "nearbyCities": [
+      "basel",
+      "bern",
+      "strasbourg",
+      "stuttgart",
+      "milan"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "geneva": {
+    "totalBins": 1840,
+    "dogBins": 11,
+    "densityPerKm2": 23.4,
+    "nearbyCities": [
+      "lyon",
+      "bern",
+      "basel",
+      "zurich",
+      "milan"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "basel": {
+    "totalBins": 672,
+    "dogBins": 22,
+    "densityPerKm2": 8.6,
+    "nearbyCities": [
+      "bern",
+      "zurich",
+      "strasbourg",
+      "stuttgart",
+      "geneva"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "graz": {
+    "totalBins": 1591,
+    "dogBins": 13,
+    "densityPerKm2": 20.3,
+    "nearbyCities": [
+      "vienna",
+      "salzburg",
+      "brno",
+      "budapest",
+      "munich"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "krakow": {
+    "totalBins": 4296,
+    "dogBins": 39,
+    "densityPerKm2": 21.4,
+    "nearbyCities": [
+      "wroclaw",
+      "warsaw",
+      "brno",
+      "budapest",
+      "vienna"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "wroclaw": {
+    "totalBins": 1566,
+    "dogBins": 10,
+    "densityPerKm2": 7.8,
+    "nearbyCities": [
+      "brno",
+      "prague",
+      "dresden",
+      "krakow",
+      "berlin"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "gdansk": {
+    "totalBins": 1536,
+    "dogBins": 9,
+    "densityPerKm2": 19.6,
+    "nearbyCities": [
+      "warsaw",
+      "wroclaw",
+      "malmo",
+      "berlin",
+      "copenhagen"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "prague": {
+    "totalBins": 3956,
+    "dogBins": 56,
+    "densityPerKm2": 19.7,
+    "nearbyCities": [
+      "dresden",
+      "brno",
+      "leipzig",
+      "wroclaw",
+      "vienna"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "brno": {
+    "totalBins": 2138,
+    "dogBins": 53,
+    "densityPerKm2": 27.2,
+    "nearbyCities": [
+      "vienna",
+      "prague",
+      "wroclaw",
+      "graz",
+      "krakow"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "barcelona": {
+    "totalBins": 1588,
+    "dogBins": 4,
+    "densityPerKm2": 7.9,
+    "nearbyCities": [
+      "toulouse",
+      "valencia",
+      "marseille",
+      "bordeaux",
+      "nice"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "valencia": {
+    "totalBins": 1391,
+    "dogBins": 7,
+    "densityPerKm2": 6.9,
+    "nearbyCities": [
+      "madrid",
+      "barcelona",
+      "toulouse",
+      "bordeaux",
+      "marseille"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "rome": {
+    "totalBins": 522,
+    "dogBins": 0,
+    "densityPerKm2": 2.6,
+    "nearbyCities": [
+      "florence",
+      "nice",
+      "milan",
+      "marseille",
+      "graz"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "milan": {
+    "totalBins": 3824,
+    "dogBins": 6,
+    "densityPerKm2": 19,
+    "nearbyCities": [
+      "bern",
+      "zurich",
+      "nice",
+      "florence",
+      "geneva"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "florence": {
+    "totalBins": 463,
+    "dogBins": 3,
+    "densityPerKm2": 5.9,
+    "nearbyCities": [
+      "rome",
+      "milan",
+      "nice",
+      "zurich",
+      "bern"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "chicago": {
+    "totalBins": 427,
+    "dogBins": 2,
+    "densityPerKm2": 2.1,
+    "nearbyCities": [
+      "toronto",
+      "washington-dc",
+      "new-york",
+      "montreal",
+      "boston"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "portland": {
+    "totalBins": 820,
+    "dogBins": 6,
+    "densityPerKm2": 4.1,
+    "nearbyCities": [
+      "seattle",
+      "vancouver",
+      "san-francisco",
+      "los-angeles",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "seattle": {
+    "totalBins": 1021,
+    "dogBins": 10,
+    "densityPerKm2": 5.1,
+    "nearbyCities": [
+      "vancouver",
+      "portland",
+      "san-francisco",
+      "los-angeles",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "boston": {
+    "totalBins": 1881,
+    "dogBins": 68,
+    "densityPerKm2": 9.4,
+    "nearbyCities": [
+      "new-york",
+      "montreal",
+      "washington-dc",
+      "toronto",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "washington-dc": {
+    "totalBins": 688,
+    "dogBins": 5,
+    "densityPerKm2": 3.4,
+    "nearbyCities": [
+      "new-york",
+      "toronto",
+      "boston",
+      "montreal",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "los-angeles": {
+    "totalBins": 134,
+    "dogBins": 0,
+    "densityPerKm2": 0.7,
+    "nearbyCities": [
+      "san-francisco",
+      "portland",
+      "seattle",
+      "vancouver",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "toronto": {
+    "totalBins": 1884,
+    "dogBins": 10,
+    "densityPerKm2": 9.4,
+    "nearbyCities": [
+      "montreal",
+      "new-york",
+      "washington-dc",
+      "boston",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "vancouver": {
+    "totalBins": 778,
+    "dogBins": 4,
+    "densityPerKm2": 3.9,
+    "nearbyCities": [
+      "seattle",
+      "portland",
+      "san-francisco",
+      "los-angeles",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "montreal": {
+    "totalBins": 2001,
+    "dogBins": 3,
+    "densityPerKm2": 10,
+    "nearbyCities": [
+      "boston",
+      "toronto",
+      "new-york",
+      "washington-dc",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "sydney": {
+    "totalBins": 1268,
+    "dogBins": 19,
+    "densityPerKm2": 6.3,
+    "nearbyCities": [
+      "melbourne"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "melbourne": {
+    "totalBins": 1530,
+    "dogBins": 13,
+    "densityPerKm2": 7.6,
+    "nearbyCities": [
+      "sydney"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "lisbon": {
+    "totalBins": 520,
+    "dogBins": 0,
+    "densityPerKm2": 2.6,
+    "nearbyCities": [
+      "madrid",
+      "valencia",
+      "bordeaux",
+      "barcelona",
+      "toulouse"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "dublin": {
+    "totalBins": 1631,
+    "dogBins": 18,
+    "densityPerKm2": 8.1,
+    "nearbyCities": [
+      "liverpool",
+      "manchester",
+      "glasgow",
+      "birmingham",
+      "leeds"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "budapest": {
+    "totalBins": 8629,
+    "dogBins": 1316,
+    "densityPerKm2": 42.9,
+    "nearbyCities": [
+      "vienna",
+      "brno",
+      "graz",
+      "krakow",
+      "wroclaw"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "hannover": {
+    "totalBins": 1667,
+    "dogBins": 0,
+    "densityPerKm2": 21.2,
+    "nearbyCities": [
+      "hamburg",
+      "leipzig",
+      "dusseldorf",
+      "cologne",
+      "berlin"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "nuremberg": {
+    "totalBins": 1267,
+    "dogBins": 1,
+    "densityPerKm2": 16.1,
+    "nearbyCities": [
+      "munich",
+      "stuttgart",
+      "frankfurt",
+      "leipzig",
+      "salzburg"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "aarhus": {
+    "totalBins": 381,
+    "dogBins": 0,
+    "densityPerKm2": 4.9,
+    "nearbyCities": [
+      "copenhagen",
+      "malmo",
+      "gothenburg",
+      "hamburg",
+      "oslo"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "bergen": {
+    "totalBins": 298,
+    "dogBins": 1,
+    "densityPerKm2": 3.8,
+    "nearbyCities": [
+      "oslo",
+      "gothenburg",
+      "aarhus",
+      "copenhagen",
+      "malmo"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "hamburg": {
+    "totalBins": 4253,
+    "dogBins": 24,
+    "densityPerKm2": 21.2,
+    "nearbyCities": [
+      "hannover",
+      "berlin",
+      "copenhagen",
+      "aarhus",
+      "leipzig"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "lyon": {
+    "totalBins": 5309,
+    "dogBins": 4,
+    "densityPerKm2": 26.4,
+    "nearbyCities": [
+      "geneva",
+      "bern",
+      "marseille",
+      "basel",
+      "nice"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "strasbourg": {
+    "totalBins": 1269,
+    "dogBins": 3,
+    "densityPerKm2": 16.2,
+    "nearbyCities": [
+      "stuttgart",
+      "basel",
+      "zurich",
+      "bern",
+      "frankfurt"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "bern": {
+    "totalBins": 1078,
+    "dogBins": 17,
+    "densityPerKm2": 13.7,
+    "nearbyCities": [
+      "basel",
+      "zurich",
+      "geneva",
+      "strasbourg",
+      "milan"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "vienna": {
+    "totalBins": 9523,
+    "dogBins": 27,
+    "densityPerKm2": 47.4,
+    "nearbyCities": [
+      "brno",
+      "graz",
+      "budapest",
+      "salzburg",
+      "prague"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "salzburg": {
+    "totalBins": 463,
+    "dogBins": 1,
+    "densityPerKm2": 5.9,
+    "nearbyCities": [
+      "munich",
+      "graz",
+      "nuremberg",
+      "vienna",
+      "prague"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "warsaw": {
+    "totalBins": 6801,
+    "dogBins": 127,
+    "densityPerKm2": 33.8,
+    "nearbyCities": [
+      "krakow",
+      "gdansk",
+      "wroclaw",
+      "brno",
+      "prague"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "madrid": {
+    "totalBins": 3343,
+    "dogBins": 26,
+    "densityPerKm2": 16.6,
+    "nearbyCities": [
+      "valencia",
+      "lisbon",
+      "barcelona",
+      "toulouse",
+      "bordeaux"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "san-francisco": {
+    "totalBins": 1204,
+    "dogBins": 3,
+    "densityPerKm2": 6,
+    "nearbyCities": [
+      "los-angeles",
+      "portland",
+      "seattle",
+      "vancouver",
+      "chicago"
+    ],
+    "lastUpdated": "2026-03-04"
+  },
+  "brussels": {
+    "totalBins": 6915,
+    "dogBins": 11,
+    "densityPerKm2": 34.4,
+    "nearbyCities": [
+      "antwerp",
+      "ghent",
+      "eindhoven",
+      "rotterdam",
+      "the-hague"
+    ],
+    "lastUpdated": "2026-03-04"
+  }
+}

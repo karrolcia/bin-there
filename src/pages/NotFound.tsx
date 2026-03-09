@@ -1,17 +1,16 @@
-import { useLocation, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, Search } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 import logo from "@/assets/logo.svg";
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-    }
-  }, [location.pathname]);
+  useSEO({
+    title: "Page Not Found - bin there",
+    description: "The page you're looking for doesn't exist.",
+    path: "/404",
+    noindex: true
+  });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-secondary/20">
@@ -31,7 +30,7 @@ const NotFound = () => {
               Go Home
             </Button>
           </Link>
-          <Link to="/?map=true">
+          <Link to="/">
             <Button variant="outline" className="w-full sm:w-auto" aria-label="Find bins on map">
               <Search className="w-4 h-4 mr-2" />
               Find Bins

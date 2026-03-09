@@ -1,0 +1,36 @@
+# bin there
+> Find the nearest public trash can. Free, fast, global.
+
+## What is bin there?
+bin there is a free web app that helps you find the nearest public trash can using OpenStreetMap data. It shows bins on an interactive map with walking directions to the nearest one. No account required.
+
+## How it works
+1. Open binthere.online and click "Bin It"
+2. Allow location access to see nearby bins on the map
+3. Click any bin or "Find Nearest Bin" for walking directions
+4. Mark it as used when you arrive (optional, for streak tracking)
+
+## Key facts
+- Data source: OpenStreetMap (community-maintained, ~500K waste baskets globally)
+- Map provider: Mapbox GL JS
+- Coverage: Global, densest in Europe (Germany, Netherlands, UK, Nordics, France)
+- Dog waste bins: Shown where tagged in OpenStreetMap
+- Walking directions: Calculated via Mapbox Directions API
+- Cost: Free, no ads, no subscription
+- Gamification: Streak tracking for registered users
+- Privacy: Location used only for finding nearby bins, not stored permanently
+
+## City directory
+Browse bins by city at https://binthere.online/bins/
+
+## Technical details
+- Stack: React, Vite, Supabase, Mapbox GL
+- Data: OpenStreetMap Overpass API (amenity=waste_basket)
+- Authentication: Optional, via Supabase Auth
+
+## Links
+- App: https://binthere.online
+- City directory: https://binthere.online/bins/
+- FAQ: https://binthere.online/faq
+- Privacy policy: https://binthere.online/privacy
+- Terms of service: https://binthere.online/terms

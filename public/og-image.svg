@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Warm cream background -->
+  <rect width="1200" height="630" fill="#f5f0e8"/>
+
+  <!-- Lush green panel — right third -->
+  <rect x="800" y="0" width="400" height="630" fill="#4a6b52"/>
+
+  <!-- Layered darker green — depth -->
+  <rect x="840" y="260" width="360" height="370" fill="#3d5a45" opacity="0.45"/>
+
+  <!-- Arch cutout — cream semicircle at top of green panel -->
+  <circle cx="1000" cy="0" r="140" fill="#f5f0e8"/>
+
+  <!-- Terracotta accents — small, organic -->
+  <circle cx="960" cy="420" r="20" fill="#c4896b" opacity="0.65"/>
+  <circle cx="1060" cy="340" r="10" fill="#c4896b" opacity="0.35"/>
+
+  <!-- Subtle dot cluster — top left, japandi -->
+  <circle cx="80" cy="72" r="4" fill="#4a6b52" opacity="0.1"/>
+  <circle cx="95" cy="62" r="2.5" fill="#4a6b52" opacity="0.07"/>
+  <circle cx="70" cy="86" r="3" fill="#c4896b" opacity="0.08"/>
+
+  <!-- Thin line — midcentury divider -->
+  <rect x="72" y="388" width="60" height="1.5" rx="0.75" fill="#4a6b52" opacity="0.18"/>
+
+  <!-- Brand name -->
+  <text x="72" y="300" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="68" font-weight="700" fill="#2c2c2a" letter-spacing="-2">bin there</text>
+
+  <!-- Tagline -->
+  <text x="74" y="358" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="25" font-weight="400" fill="#5c5c58">Find a bin. Walk on happy.</text>
+
+  <!-- Descriptor -->
+  <text x="74" y="432" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" font-weight="400" fill="#9a9a94">Free bin locator for dog owners</text>
+
+  <!-- Domain — bottom left -->
+  <text x="74" y="576" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" font-weight="500" fill="#9a9a94" letter-spacing="0.6">binthere.online</text>
+</svg>

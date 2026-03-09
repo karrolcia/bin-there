@@ -1,18 +1,15 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 import logo from "@/assets/logo.svg";
 
 const Privacy = () => {
-  useEffect(() => {
-    document.title = "Privacy Policy - bin there";
-    
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute("content", "Learn how bin there collects, uses, and protects your data. Our privacy policy explains our commitment to your privacy and data security.");
-    }
-  }, []);
+  useSEO({
+    title: "Privacy Policy - bin there",
+    description: "Learn how bin there collects, uses, and protects your data. Our privacy policy explains our commitment to your privacy and data security.",
+    path: "/privacy"
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">

@@ -1,18 +1,15 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 import logo from "@/assets/logo.svg";
 
 const Terms = () => {
-  useEffect(() => {
-    document.title = "Terms of Service - bin there";
-    
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute("content", "Read the terms and conditions for using bin there. Understand your rights and responsibilities when using our bin locator service.");
-    }
-  }, []);
+  useSEO({
+    title: "Terms of Service - bin there",
+    description: "Read the terms and conditions for using bin there. Understand your rights and responsibilities when using our bin locator service.",
+    path: "/terms"
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">

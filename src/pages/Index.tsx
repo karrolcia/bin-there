@@ -1,15 +1,31 @@
-import { useState, useEffect } from 'react';
-import Map from '@/components/Map';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { StatsDisplay } from '@/components/StatsDisplay';
 import { Footer } from '@/components/Footer';
+import { useSEO } from '@/hooks/useSEO';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import logo from '@/assets/logo.svg';
 
+const Map = lazy(() => import('@/components/Map'));
+
 const Index = () => {
-  const [showMap, setShowMap] = useState(false);
+  const [searchParams] = useSearchParams();
+  const latParam = searchParams.get('lat');
+  const lngParam = searchParams.get('lng');
+  const initialCenter = latParam && lngParam
+    ? { lat: parseFloat(latParam), lng: parseFloat(lngParam) }
+    : undefined;
+
+  const [showMap, setShowMap] = useState(!!initialCenter);
+
+  useSEO({
+    title: "bin there - Find the Nearest Trash Can",
+    description: "Find the nearest public trash can instantly with bin there. Never walk around with a poop bag again! Simple, fast, and free bin locator for responsible waste disposal.",
+    path: "/"
+  });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -33,7 +49,9 @@ const Index = () => {
     return (
       <>
         <StatsDisplay />
-        <Map />
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-muted-foreground">Loading map...</div></div>}>
+          <Map initialCenter={initialCenter} />
+        </Suspense>
       </>
     );
   }
@@ -50,14 +68,14 @@ const Index = () => {
             Sign in
           </button>
         </header>
-        
+
         <div className="flex-1 flex items-center justify-center pb-16">
           <div className="max-w-2xl mx-auto px-6 text-center space-y-12">
           <div className="space-y-8 fade-up-enter">
-            <img 
-              src={logo} 
-              alt="bin there" 
-              className="h-28 md:h-36 mx-auto" 
+            <img
+              src={logo}
+              alt="bin there"
+              className="h-28 md:h-36 mx-auto"
               style={{ animationDelay: '0s' }}
             />
           <p className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed" style={{ animationDelay: '0.1s' }}>
@@ -75,9 +93,9 @@ const Index = () => {
         </Button>
         </div>
       </div>
-      
+
       <AuthModal
-          open={showAuthModal} 
+          open={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onSuccess={() => {
             setShowAuthModal(false);
