@@ -92,8 +92,8 @@ function htmlHead(
   title: string,
   description: string,
   canonical: string,
-  ogImage?: string
 ): string {
+  const ogImage = `${BASE_URL}/og-image.png`;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,10 +105,14 @@ function htmlHead(
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:url" content="${canonical}">
-  <meta property="og:type" content="website">${ogImage ? `\n  <meta property="og:image" content="${ogImage}">` : ""}
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="${ogImage}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${ogImage}">
   <meta name="theme-color" content="hsl(150, 18%, 45%)">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>`;
