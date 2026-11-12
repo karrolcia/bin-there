@@ -40,9 +40,16 @@ Deno.serve(async (req) => {
       return createRateLimitResponse(rateLimitResult, corsHeaders);
     }
 
+    // Writes go through the service role: bin_events has no INSERT policy for
+    // anon/authenticated, so this function is the only way to record an event.
+    // user_id is only ever taken from a verified JWT below, never from the body.
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!serviceRoleKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured');
+    }
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      serviceRoleKey,
       {
         auth: {
           persistSession: false,

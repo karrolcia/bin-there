@@ -61,9 +61,16 @@ Deno.serve(async (req) => {
       console.log('Rate limit exceeded for IP:', ipAddress);
       return createRateLimitResponse(rateLimitResult, corsHeaders);
     }
+    // Writes go through the service role: user_activities has no INSERT policy for
+    // anon/authenticated, so this function is the only way to record activity.
+    // user_id is only ever taken from a verified JWT below, never from the body.
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!serviceRoleKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured');
+    }
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      serviceRoleKey,
       {
         auth: {
           persistSession: false,
