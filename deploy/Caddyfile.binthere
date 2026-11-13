@@ -1,0 +1,26 @@
+# Append to the hippo box's /etc/caddy/Caddyfile, then:
+#   sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
+#
+# No `log` directive on purpose: binthere keeps no access logs (the privacy
+# page says so). If the Caddyfile has a global `log` in its options block,
+# check it doesn't apply to these sites.
+
+binthere.online {
+	encode zstd gzip
+
+	# Security headers live here only, not in the app, to avoid duplicates.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(self), camera=(), microphone=(), payment=()"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:3100
+}
+
+www.binthere.online {
+	redir https://binthere.online{uri} permanent
+}

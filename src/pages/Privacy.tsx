@@ -7,7 +7,7 @@ import logo from "@/assets/logo.svg";
 const Privacy = () => {
   useSEO({
     title: "Privacy Policy - bin there",
-    description: "Learn how bin there collects, uses, and protects your data. Our privacy policy explains our commitment to your privacy and data security.",
+    description: "bin there has no accounts and keeps no personal data on its server. Here is exactly what happens with your location and usage data.",
     path: "/privacy"
   });
 
@@ -25,127 +25,93 @@ const Privacy = () => {
             <img src={logo} alt="bin there" className="h-12" />
             <h1 className="text-4xl font-bold text-foreground">Privacy Policy</h1>
           </div>
-          <p className="text-muted-foreground">Last updated: October 21, 2025</p>
+          <p className="text-muted-foreground">Last updated: November 13, 2026</p>
         </div>
 
         <div className="space-y-8 text-foreground/90">
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Introduction</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">The short version</h2>
             <p className="mb-4">
-              Welcome to bin there. We're committed to protecting your privacy and being transparent about how we collect, use, and protect your information. This privacy policy explains our data practices in clear, simple terms.
+              bin there has no accounts and keeps no personal data on its own server. Your bin count and streak are stored only in your browser. We don't sell anything to anyone.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Information We Collect</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">What happens with your location</h2>
+            <p className="mb-4">
+              If you allow it, your browser shares your location with the app so it can find bins near you. It is used in your browser and sent only to the map services that need it to answer your request (see "Services we use" below). bin there's own server never receives or stores your location.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">What our server stores</h2>
+            <p className="mb-4">
+              When you tap "Binned It!", we add one to a public counter for that bin. We store the bin's OpenStreetMap ID, its position and name, and how often it has been used. Nothing about you is stored with it: no account, no IP address, no location of yours, no device details.
+            </p>
+            <p>
+              To stop abuse, the server briefly remembers your IP address in memory (for at most 6 hours) so the same person can't count one bin over and over or flood the service. It is never written to disk and is forgotten when the server restarts. We don't keep access logs of visits to binthere.online.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">What stays in your browser</h2>
+            <p>
+              Your total bins and streak are saved in your browser's local storage on your device. We can't see them. Clearing your browser data deletes them, and they don't follow you to other devices.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Services we use</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-xl font-medium mb-2">Location Data</h3>
-                <p>We collect your location when you use the map feature to find nearby bins. This data helps us show you relevant trash can locations and improve our service.</p>
+                <h3 className="text-xl font-medium mb-2">Hetzner (hosting, EU)</h3>
+                <p>The website and the bin counter run on a server at Hetzner in the EU.</p>
               </div>
               <div>
-                <h3 className="text-xl font-medium mb-2">Account Information</h3>
-                <p>If you create an account, we collect your email address and any profile information you choose to provide. This allows us to track your environmental impact and maintain your streak.</p>
+                <h3 className="text-xl font-medium mb-2">Mapbox (map and walking directions)</h3>
+                <p>Your browser loads map images from Mapbox and asks Mapbox for walking directions, which sends your position and the bin's position to Mapbox. Mapbox handles this under its own privacy policy.</p>
               </div>
               <div>
-                <h3 className="text-xl font-medium mb-2">Usage Data</h3>
-                <p>We collect information about how you interact with our app, including bins you've marked as used, routes calculated, and search patterns. This helps us improve the service and understand user behavior.</p>
+                <h3 className="text-xl font-medium mb-2">OpenStreetMap (bin locations and reports)</h3>
+                <p>Your browser asks the OpenStreetMap Overpass service for bins around the area you're looking at. If you report a problem with a bin, your report is posted as a public, anonymous note on OpenStreetMap at the bin's location, including any comment you add, so please don't include personal details.</p>
               </div>
               <div>
-                <h3 className="text-xl font-medium mb-2">Technical Data</h3>
-                <p>We automatically collect your IP address, browser type, device information, and user agent. This data helps us provide technical support and detect abuse.</p>
+                <h3 className="text-xl font-medium mb-2">PostHog (anonymous usage statistics, EU)</h3>
+                <p>We use PostHog's EU cloud to understand how the app is used, for example how often people search or mark a bin as used. We don't send your location to PostHog, and we don't create personal profiles.</p>
+              </div>
+              <div>
+                <h3 className="text-xl font-medium mb-2">Stripe (donations)</h3>
+                <p>If you choose to donate, you do so on Stripe's own page, under Stripe's privacy policy. We don't receive your card details.</p>
               </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">How We Use Your Information</h2>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>To show you nearby trash cans and provide navigation</li>
-              <li>To track your environmental impact (total bins used, streak days)</li>
-              <li>To improve our bin database and service quality</li>
-              <li>To send you service-related notifications (if you opt-in)</li>
-              <li>To analyze usage patterns and optimize the app</li>
-              <li>To prevent abuse and maintain service security</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Data Sharing</h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-xl font-medium mb-2">Public Data</h3>
-                <p>Aggregated bin usage statistics (total uses per bin location) are shared with the community to help identify popular bins. Your personal usage data remains private.</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-medium mb-2">Third-Party Services</h3>
-                <p>We use Mapbox for maps and OpenStreetMap data for bin locations. These services may collect their own data according to their privacy policies. We do not sell your personal information to third parties.</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-medium mb-2">Legal Requirements</h3>
-                <p>We may disclose your information if required by law, court order, or to protect our legal rights and the safety of our users.</p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Data Security</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Your rights</h2>
             <p className="mb-4">
-              We implement industry-standard security measures to protect your data, including:
+              Under the GDPR you have the right to access, correct, delete and export personal data about you, and to object to its use. Because our server stores nothing that identifies you, there is usually nothing for us to look up or delete. Your stats are in your own browser and you can delete them yourself. For anything held by the services above, you can also contact them directly.
             </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Encrypted data transmission (HTTPS/TLS)</li>
-              <li>Secure authentication and password hashing</li>
-              <li>Row-level security policies on our database</li>
-              <li>Regular security audits and updates</li>
-            </ul>
-            <p className="mt-4">
-              However, no method of transmission over the internet is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Your Rights</h2>
-            <p className="mb-4">You have the right to:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Access your personal data</li>
-              <li>Correct inaccurate data</li>
-              <li>Request deletion of your data</li>
-              <li>Opt-out of location tracking (though this limits app functionality)</li>
-              <li>Export your data</li>
-              <li>Withdraw consent at any time</li>
-            </ul>
-            <p className="mt-4">
-              To exercise these rights, please contact us at info@binthere.online
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Data Retention</h2>
             <p>
-              We retain your data for as long as your account is active or as needed to provide services. If you delete your account, we will delete or anonymize your personal data within 30 days, except where we're required to retain it for legal purposes.
+              Questions or requests: info@binthere.online
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Children</h2>
             <p>
-              Our service is not intended for children under 13 years of age. We do not knowingly collect personal information from children. If you believe we've collected data from a child, please contact us immediately.
+              bin there doesn't ask for or store personal information, from children or anyone else.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Changes to This Policy</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Changes to this policy</h2>
             <p>
-              We may update this privacy policy from time to time. We'll notify you of significant changes by updating the "Last updated" date and, if appropriate, providing additional notice (such as an in-app notification or email).
+              If how we handle data changes, we'll update this page and the date at the top.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Contact Us</h2>
-            <p className="mb-4">
-              If you have questions about this privacy policy or our data practices, please contact us at:
-            </p>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Contact</h2>
             <p className="font-medium">
               Email: info@binthere.online
             </p>

@@ -1,0 +1,26 @@
+{
+  "name": "binthere-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Serves binthere.online (static build) and the tiny bin-count API. No accounts, no personal data.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/index.js",
+    "test": "tsc -p tsconfig.json && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.19",
+    "better-sqlite3": "^12.11.1",
+    "hono": "^4.13.18",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}

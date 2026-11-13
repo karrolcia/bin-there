@@ -1,0 +1,35 @@
+# binthere.online on the hippo box. Deploy:
+#   ssh hippo 'cd /opt/bin-there && git pull && docker compose up -d --build'
+# The Compose project is "bin-there", so it gets its own network and volume and
+# cannot see Hippocampus's container, network, volume or env file.
+services:
+  binthere:
+    build:
+      context: .
+      args:
+        VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:?Set VITE_MAPBOX_TOKEN in /opt/bin-there/.env}
+    container_name: binthere
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3000"   # localhost only; Caddy on the host is the only way in
+    volumes:
+      - binthere-data:/data       # bin_counts SQLite only
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,nodev,size=16M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Caps so a flood against binthere can't starve Hippocampus on the same box.
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  binthere-data:

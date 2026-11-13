@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+dist
+server/node_modules
+server/dist
+**/*.db
+**/*.db-*
+.lovable
+scripts
+deploy
+README.md
+bun.lockb

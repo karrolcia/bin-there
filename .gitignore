@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local env (the Mapbox token is set on the server in /opt/bin-there/.env)
+.env
+.env.*
+!.env.example

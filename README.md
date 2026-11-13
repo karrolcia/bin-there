@@ -1,3 +1,28 @@
+# bin there
+
+Find the nearest public bin: [binthere.online](https://binthere.online).
+
+## How it's built
+
+- **Website:** Vite + React + Tailwind (`src/`). Bin locations come from OpenStreetMap
+  (Overpass), maps and walking directions from Mapbox, usage stats from PostHog (EU).
+- **Tiny API:** Hono + SQLite (`server/`). It counts how often each bin is used and
+  serves "popular bins" when Overpass is down. No accounts, no personal data.
+- **Your stats:** a visitor's bin count and streak stay in their own browser (`src/lib/localStats.ts`).
+- **Bin reports:** go to OpenStreetMap as anonymous notes (`src/components/ReportBinDialog.tsx`).
+- **Hosting:** one Docker container on the hippo Hetzner box behind Caddy. See
+  [`deploy/README.md`](deploy/README.md).
+
+## Develop
+
+```sh
+cp .env.example .env            # add a Mapbox pk. token
+npm ci && npm run dev            # website on :8080 (the /api calls need the server below)
+cd server && npm ci && npm test  # API tests
+```
+
+---
+
 # Welcome to your Lovable project
 
 ## Project info

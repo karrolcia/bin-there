@@ -17,7 +17,7 @@ bin there is a free web app that helps you find the nearest public trash can usi
 - Dog waste bins: Shown where tagged in OpenStreetMap
 - Walking directions: Calculated via Mapbox Directions API
 - Cost: Free, no ads, no subscription
-- Gamification: Streak tracking for registered users
+- Gamification: Personal streak tracking, stored in the visitor's browser (no account)
 - Privacy: Location used only for finding nearby bins, not stored permanently
 
 ## City directory

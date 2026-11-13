@@ -44,27 +44,10 @@ const Terms = () => {
             <ul className="list-disc pl-6 space-y-2">
               <li>Interactive map showing trash can locations</li>
               <li>Walking directions to nearest bins</li>
-              <li>Activity tracking for registered users</li>
+              <li>Personal bin count and streak, stored in your browser</li>
+              <li>Reporting map problems with a bin to OpenStreetMap</li>
               <li>Community-driven bin usage statistics</li>
             </ul>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">User Accounts</h2>
-            <div className="space-y-4">
-              <p>
-                When you create an account with us, you must provide accurate, complete, and current information. You are responsible for maintaining the confidentiality of your account and password.
-              </p>
-              <p>
-                You agree to:
-              </p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Keep your password secure and confidential</li>
-                <li>Notify us immediately of any unauthorized access</li>
-                <li>Accept responsibility for all activities under your account</li>
-                <li>Provide accurate location data when using the Service</li>
-              </ul>
-            </div>
           </section>
 
           <section>
@@ -128,7 +111,6 @@ const Terms = () => {
               <li>Your access to or use of (or inability to access or use) the Service</li>
               <li>Reliance on inaccurate bin location data</li>
               <li>Any conduct or content of any third party on the Service</li>
-              <li>Unauthorized access to your account or data</li>
             </ul>
           </section>
 
@@ -142,7 +124,7 @@ const Terms = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4 text-foreground">Termination</h2>
             <p>
-              We may terminate or suspend your account and access to the Service immediately, without prior notice or liability, for any reason, including breach of these Terms. Upon termination, your right to use the Service will cease immediately.
+              We may block or limit access to the Service immediately, without prior notice or liability, for any reason, including breach of these Terms. Upon termination, your right to use the Service will cease immediately.
             </p>
           </section>
 
