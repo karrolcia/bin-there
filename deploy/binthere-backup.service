@@ -1,0 +1,7 @@
+[Unit]
+Description=Back up binthere SQLite (bin counts)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/bin-there/deploy/binthere-backup.sh

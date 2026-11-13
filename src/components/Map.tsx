@@ -5,10 +5,17 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { celebrateBinning } from '@/utils/confetti';
 import { BinSuccessModal } from './BinSuccessModal';
-import { Compass, Heart, Trash2, Navigation, X, MapPin } from 'lucide-react';
+import { Compass, Heart, Trash2, Navigation, X, MapPin, Flag } from 'lucide-react';
 import logo from '@/assets/logo.svg';
-import { supabase } from '@/integrations/supabase/client';
+import { ReportBinDialog } from './ReportBinDialog';
 import { trackAppOpened, trackBinSearched, trackBinMarked, trackRouteCalculated, trackLocationEvent } from '@/utils/activityTracker';
+import { fetchPopularBins, reportBinned } from '@/lib/binApi';
+import { recordBin } from '@/lib/localStats';
+
+// Public Mapbox token (pk.), baked in at build time. It is visible in the
+// browser by design; it is protected by the URL restriction set on the token
+// in the Mapbox dashboard, not by being secret.
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
 
 // Debounce utility
 const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
@@ -53,7 +60,8 @@ const Map = ({ initialCenter }: MapProps = {}) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const isMountedRef = useRef(true);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  const mapboxToken = MAPBOX_TOKEN ?? null;
+  const [showReportDialog, setShowReportDialog] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [trashCans, setTrashCans] = useState<TrashCan[]>([]);
   const [isLoadingBins, setIsLoadingBins] = useState(false);
@@ -137,37 +145,11 @@ const Map = ({ initialCenter }: MapProps = {}) => {
   };
   const fetchTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Fetch Mapbox token on mount
   useEffect(() => {
-    const fetchMapboxToken = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        if (error) {
-          console.error('Error fetching Mapbox token:', error);
-          
-          // Check if it's an authentication error
-          if (error.message?.includes('Authentication required') || error.message?.includes('Invalid authentication')) {
-            toast.error('Please sign in to use the map', { duration: 5000 });
-          } else {
-            toast.error('Failed to load map configuration');
-          }
-          return;
-        }
-        
-        if (data?.token) {
-          setMapboxToken(data.token);
-        } else {
-          console.error('No token received from backend');
-          toast.error('Map configuration error');
-        }
-      } catch (error) {
-        console.error('Failed to fetch Mapbox token:', error);
-        toast.error('Failed to load map configuration');
-      }
-    };
-
-    fetchMapboxToken();
+    if (!MAPBOX_TOKEN) {
+      console.error('VITE_MAPBOX_TOKEN is not set at build time');
+      toast.error('Map configuration error');
+    }
   }, []);
 
   const getRadiusForZoom = (zoom: number): number => {
@@ -213,19 +195,17 @@ const Map = ({ initialCenter }: MapProps = {}) => {
     throw new Error('Max retries reached');
   };
 
-  const fetchFallbackBins = async () => {
+  // When OpenStreetMap's Overpass API is down or slow, show bins nearby that
+  // other binthere visitors have used (from our own tiny API).
+  const fetchFallbackBins = async (lat: number, lon: number) => {
     try {
-      const { data } = await supabase
-        .from('bin_usage_stats')
-        .select('*')
-        .order('usage_count', { ascending: false })
-        .limit(50);
+      const data = await fetchPopularBins(lat, lon);
       
-      if (data && data.length > 0) {
-        const fallbackBins = data.map(bin => ({
-          id: bin.id,
-          coordinates: [bin.bin_lng, bin.bin_lat] as [number, number],
-          name: bin.bin_name
+      if (data.length > 0) {
+        const fallbackBins: TrashCan[] = data.map(bin => ({
+          id: bin.osmId,
+          coordinates: [bin.lng, bin.lat] as [number, number],
+          name: bin.name
         }));
         setTrashCans(fallbackBins);
         toast.info('Showing popular bins from community data');
@@ -242,7 +222,7 @@ const Map = ({ initialCenter }: MapProps = {}) => {
     setIsLoadingBins(true);
     
     // Track bin search
-    trackBinSearched([lon, lat], radiusMeters);
+    trackBinSearched(radiusMeters);
     
     try {
       const overpassQuery = `
@@ -284,7 +264,7 @@ const Map = ({ initialCenter }: MapProps = {}) => {
       console.error('Error fetching trash cans:', error);
       
       // Try fallback bins from database
-      const fallbackSuccess = await fetchFallbackBins();
+      const fallbackSuccess = await fetchFallbackBins(lat, lon);
       
       if (!fallbackSuccess) {
         // Better error messages
@@ -419,8 +399,8 @@ const Map = ({ initialCenter }: MapProps = {}) => {
         setUserLocation(userCoords);
         
         // Track location enabled and app opened
-        trackLocationEvent(true, userCoords);
-        trackAppOpened(userCoords);
+        trackLocationEvent(true);
+        trackAppOpened();
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
@@ -871,35 +851,18 @@ const Map = ({ initialCenter }: MapProps = {}) => {
       trackBinMarked(nearestBin.coordinates, nearestBin.name);
     }
     
-    // Track the bin event in backend with actual arrival location
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authHeader = session?.access_token ? `Bearer ${session.access_token}` : undefined;
-      
-      const { data, error } = await supabase.functions.invoke('track-bin-event', {
-        body: {
-          binLat: nearestBin?.coordinates[1],
-          binLng: nearestBin?.coordinates[0],
-          binName: nearestBin?.name || 'Unknown Bin',
-          routeDistance: routeInfo?.distance,
-          routeDuration: routeInfo?.duration,
-          userArrivalLat: userLocation?.[1], // Actual user location
-          userArrivalLng: userLocation?.[0],
-          distanceToBin: distanceToBin,
-        },
-        headers: authHeader ? { Authorization: authHeader } : undefined,
-      });
+    // Streaks and totals live only in this browser.
+    setUserStats(recordBin());
 
-      if (error) {
-        console.error('Error tracking bin event:', error);
-      } else if (data) {
-        setUserStats({
-          totalBins: data.totalBins || 0,
-          streakDays: data.streakDays || 0,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to track bin event:', error);
+    // Add one to this bin's community count. Only public OpenStreetMap data
+    // is sent (the bin's id, position and name), never the visitor's location.
+    if (nearestBin && typeof nearestBin.id === 'number') {
+      void reportBinned({
+        osmId: nearestBin.id,
+        lat: nearestBin.coordinates[1],
+        lng: nearestBin.coordinates[0],
+        name: (nearestBin.name || 'Public Bin').slice(0, 120),
+      });
     }
     
     // Remove route from map
@@ -1106,8 +1069,24 @@ const Map = ({ initialCenter }: MapProps = {}) => {
           <div className="text-sm text-muted-foreground">
             About {Math.ceil(routeInfo.duration / 60)} min walk
           </div>
+          {nearestBin && (
+            <button
+              type="button"
+              onClick={() => setShowReportDialog(true)}
+              className="mt-2 text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline flex items-center gap-1"
+            >
+              <Flag className="w-3 h-3" />
+              Bin missing? Report it
+            </button>
+          )}
         </div>
       )}
+
+      <ReportBinDialog
+        open={showReportDialog}
+        onClose={() => setShowReportDialog(false)}
+        bin={nearestBin}
+      />
       
       <BinSuccessModal 
         open={showSuccessModal} 
