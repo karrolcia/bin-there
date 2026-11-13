@@ -71,7 +71,7 @@ Lovable keeps serving the site until step 5, so there is no downtime.
    retrying, and the reload doesn't affect hippo.sarna.rocks.
 5. **DNS**, at the registrar (nameservers are `ns-cloud-c*.googledomains.com`, now Squarespace Domains):
    - `binthere.online` A record: `185.158.133.1` (Lovable) → `89.167.92.238`
-   - `www.binthere.online`: CNAME → `binthere.online` (it has no record today)
+   - `www.binthere.online`: CNAME → `binthere.online` (today it also resolves to Lovable, `185.158.133.1`; replace that record)
 
    Once DNS has switched over, check `curl -sI https://binthere.online` and
    `curl -s https://binthere.online/api/health`. Caddy issues the certificate on first use.

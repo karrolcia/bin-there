@@ -16,7 +16,11 @@ docker exec -w /app binthere node -e '
     .then(() => { db.close(); })
     .catch((e) => { console.error(e); process.exit(1); });
 '
-docker cp binthere:/tmp/binthere-backup.db "$DEST/binthere-$STAMP.db"
+# /tmp is a tmpfs mount, which `docker cp` can't see, so stream the file out.
+# Write to .partial first so a failed copy never looks like a good backup.
+docker exec binthere cat /tmp/binthere-backup.db > "$DEST/binthere-$STAMP.db.partial"
 docker exec binthere rm -f /tmp/binthere-backup.db
+test -s "$DEST/binthere-$STAMP.db.partial"
+mv "$DEST/binthere-$STAMP.db.partial" "$DEST/binthere-$STAMP.db"
 ls -1t "$DEST"/binthere-*.db | tail -n +$((KEEP + 1)) | xargs -r rm -f
 echo "binthere backup ok: $DEST/binthere-$STAMP.db"
